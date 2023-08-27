@@ -109,6 +109,7 @@
       <Value>../HAL/pwm</Value>
       <Value>../MCAL/adc</Value>
       <Value>../MCAL/gpio</Value>
+      <Value>../MCAL/timers</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize debugging experience (-Og)</avrgcc.compiler.optimization.level>
@@ -179,6 +180,12 @@
     <Compile Include="HAL\led\Led_Cfg.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\pwm\pwm.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\pwm\pwm.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -206,6 +213,12 @@
     <Compile Include="MCAL\gpio\gpio_private.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="MCAL\timers\Timers.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MCAL\timers\Timers.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="COMMON\timer" />
@@ -221,6 +234,7 @@
     <Folder Include="APP" />
     <Folder Include="COMMON" />
     <Folder Include="MCAL\adc" />
+    <Folder Include="MCAL\timers" />
   </ItemGroup>
   <ItemGroup>
     <None Include="APP\app_program.c~">
