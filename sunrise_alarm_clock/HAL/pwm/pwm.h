@@ -8,8 +8,17 @@
 
 #ifndef PWM_H_
 #define PWM_H_
+
+
 #include "Timers.h"
 #include "Led.h"
+
+
+#define   NUMBEROFARRAY       4
+#define   NUMBEROFELEMNTS     2
+#define   MAXMUNREGNUMBER     256
+#define   FIRSTINDEX          0
+#define   SECONDINDEX         1
 
 void Pwm_Init(uint8_t_ **Led_Arr);
 void timer_init();
