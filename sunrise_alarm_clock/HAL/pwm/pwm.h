@@ -20,7 +20,7 @@
 #define   FIRSTINDEX          0
 #define   SECONDINDEX         1
 
-void Pwm_Init(uint8_t_ **Led_Arr);
+void Pwm_Init(uint8_t_ Led_Arr [][2]);
 void timer_init();
 void Pwm_Start();
 void Pwm_Stop();
