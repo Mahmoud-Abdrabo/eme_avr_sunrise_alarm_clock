@@ -23,6 +23,10 @@
 #define APP_CAR_FRONT_RIGHT_LIGHT_PIN   LED_GREEN_PIN
 #define APP_CAR_FRONT_RIGHT_LIGHT_PORT  LED_GREEN_PORT
 
+
+#define  MINMUN_DUTY    5
+#define  MAXMUM_DUTY    95
+
 /* App Strings */
 #define APP_STR_TITLE       "    Team GUCALEX"
 #define APP_STR_CAR_OFF     "Welcome .. GUCALEX"

@@ -36,7 +36,7 @@ void Pwm_Stop(){
 
 
 void Set_Dutycycle(uint8_t_ percentage){
-    OCR0=MAXMUNREGNUMBER*(percentage/100);
+    OCR0=(MAXMUNREGNUMBER*(10*percentage/100))/10;
 }
 
 ISR(TIMER0_OVF_vect)
