@@ -18,7 +18,8 @@
 
 typedef enum
 {
-    initial= 0,
+    init= 0,
+    show_options,
     set_alarm,
     cancel_alarm,
     show_alarms
@@ -31,7 +32,7 @@ static void app_keypad_initial_states(uint8_t value);
 static void app_reset_timer();
 
 /* Time elapsed */
-static uint8_t uint8_seconds_elapsed= 0;
+static uint16_t uint8_seconds_elapsed= 0;
 
 /* pressed/unpressed flag */
 static boolean bool_is_pressed= FALSE;
@@ -40,7 +41,7 @@ static boolean bool_is_pressed= FALSE;
 static uint8_t_ alarm_digit_index = 4;
 
 /* Initial Alarm state */
-app_state g_app_state= initial;
+app_state g_app_state= init;
 
 /* Global alarm value */
 uint16_t uint16_alarm_total_seconds=-1;
@@ -88,7 +89,7 @@ void app_init()
 }
 void app_start()
 {
-    app_switch_state(initial);
+    // app_switch_state(initial);
 
     uint8_t kpd_value;
 
@@ -106,21 +107,30 @@ void app_start()
         /* Update is_pressed flag */
         bool_is_pressed= LDR_PRESSED_THRESHOLD > LDR_VALUE;
 
-        /* current keypad value */
-
         switch (g_app_state)
         {
-            case initial:
+            case init:
+            {
+                app_switch_state(show_options);
+                break;
+            }
+            case show_options:
             {
                 /* if set button is pressed */
                 if(SET_ALARM == kpd_value)
                 {
-                    /* switch state to set alarm */
+                    /* Switch state to set alarm */
                     app_switch_state(set_alarm);
                 }
-                else if()
+                else if(CANCEL_ALARM == kpd_value)
                 {
-                    //..
+                    /* Switch state to cancel alarm */
+                    app_switch_state(cancel_alarm);
+                }
+                else if(SHOW_ALARM == kpd_value)
+                {
+                    /* Switch state to show alarm */
+                    app_switch_state(show_alarms);
                 }
                 else
                 {
@@ -136,7 +146,7 @@ void app_start()
                 {
                     switch (kpd_value)
                     {
-                        case '1': // set alarm fa 3mlt update lel kpd_value= '1'
+                        case '1':
                         case '2':
                         case '3':
                         case '4':
@@ -177,8 +187,16 @@ void app_start()
                             /* update index */
                             DECREMENT(alarm_digit_index);
 
-                            if()
-                                reak;
+                            if(uint16_alarm_total_seconds==uint8_seconds_elapsed)
+                            {
+
+                            }
+                            else
+                            {
+
+                            }
+
+                            break;
                         }
                         default:
                         {
@@ -212,25 +230,26 @@ void app_start()
             default:
             {
                 /* Reset state to initial state */
-                app_switch_state(initial);
+                app_switch_state(init);
                 break;
             }
         }
     }
 }
 
-
-
-
 static void app_switch_state(app_state state)
 {
     switch (state)
     {
-        case initial:
+        case init:
         {
-            /* Init LCD UI */
             LCD_clear();
             LCD_sendString(APP_STR_TITLE);
+            break;
+        }
+        case show_options:
+        {
+            /* LCD show options Menu */
             LCD_setCursor(LCD_LINE1, LCD_COL0);
             LCD_sendString(APP_STR_SET_ALARM);
             LCD_setCursor(LCD_LINE2, LCD_COL0);
@@ -242,7 +261,7 @@ static void app_switch_state(app_state state)
         case set_alarm:
         {
             LCD_clear();
-            LCD_setCursor(LCD_LINE1, LCD_COL7);
+            LCD_setCursor(LCD_LINE2, LCD_COL7);
 
             /* reset index flag */
             alarm_digit_index = 4;
