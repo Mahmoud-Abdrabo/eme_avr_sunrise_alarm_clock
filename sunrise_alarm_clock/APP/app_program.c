@@ -36,6 +36,9 @@ static uint8_t uint8_seconds_elapsed= 0;
 /* pressed/unpressed flag */
 static boolean bool_is_pressed= FALSE;
 
+/* Global alarm index */
+static uint8_t_ alarm_digit_index = 4;
+
 /* Initial Alarm state */
 app_state g_app_state= initial;
 
@@ -89,10 +92,13 @@ void app_start()
 
     uint8_t kpd_value;
 
-    while (TRUE){
+    while (TRUE)
+    {
 
-        kpd_value= KeyPad_GetValue();
-        app_keypad_initial_states(kpd_value);
+        /* get keypad current value */
+        kpd_value = KeyPad_GetValue();
+
+//        app_keypad_initial_states(kpd_value);
 
         /* Read LDR */
         ldr_read();
@@ -100,16 +106,97 @@ void app_start()
         /* Update is_pressed flag */
         bool_is_pressed= LDR_PRESSED_THRESHOLD > LDR_VALUE;
 
+        /* current keypad value */
+
         switch (g_app_state)
         {
             case initial:
             {
+                /* if set button is pressed */
+                if(SET_ALARM == kpd_value)
+                {
+                    /* switch state to set alarm */
+                    app_switch_state(set_alarm);
+                }
+                else if()
+                {
+                    //..
+                }
+                else
+                {
+                    /* Do Nothing */
+                }
 
                 break;
             }
             case set_alarm:
             {
-                app_switch_state(set_alarm);
+                /* Check for key press */
+                if(0 != kpd_value)
+                {
+                    switch (kpd_value)
+                    {
+                        case '1': // set alarm fa 3mlt update lel kpd_value= '1'
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                        {
+                            /* Parse Numbers */
+                            if(4 == alarm_digit_index)
+                            {
+                                uint16_alarm_total_seconds = CONVERT_CHAR_TO_DIGIT(kpd_value) * 10 * 60;
+
+                                /* Send Pressed CHAR */
+                                LCD_sendChar(kpd_value);
+                            }
+                            else if(3 == alarm_digit_index)
+                            {
+                                uint16_alarm_total_seconds += CONVERT_CHAR_TO_DIGIT(kpd_value) * 60;
+                                /* Send Pressed CHAR */
+                                LCD_sendChar(kpd_value);
+                                LCD_sendChar(':');
+                            }
+                            else if(2 == alarm_digit_index)
+                            {
+                                uint16_alarm_total_seconds += CONVERT_CHAR_TO_DIGIT(kpd_value) * 10;
+                                /* Send Pressed CHAR */
+                                LCD_sendChar(kpd_value);
+                            }
+                            else if(1 == alarm_digit_index)
+                            {
+                                uint16_alarm_total_seconds += CONVERT_CHAR_TO_DIGIT(kpd_value);
+                                /* Send Pressed CHAR*/
+                                LCD_sendChar(kpd_value);
+                            }
+
+                            /* update index */
+                            DECREMENT(alarm_digit_index);
+
+                            if()
+                                reak;
+                        }
+                        default:
+                        {
+                            /* Skip */
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    /* Do Nothing no key is pressed */
+                }
+                uint16_alarm_total_seconds+=1;
+                uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 * 60 ;
+                uint16_alarm_total_seconds+= KeyPad_GetValue() * 60 ;
+                uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 ;
+                uint16_alarm_total_seconds+= KeyPad_GetValue();
+
                 break;
             }
             case cancel_alarm:
@@ -156,11 +243,9 @@ static void app_switch_state(app_state state)
         {
             LCD_clear();
             LCD_setCursor(LCD_LINE1, LCD_COL7);
-            uint16_alarm_total_seconds+=1;
-            uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 * 60 ;
-            uint16_alarm_total_seconds+= KeyPad_GetValue() * 60 ;
-            uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 ;
-            uint16_alarm_total_seconds+= KeyPad_GetValue();
+
+            /* reset index flag */
+            alarm_digit_index = 4;
             break;
         }
         case cancel_alarm:
