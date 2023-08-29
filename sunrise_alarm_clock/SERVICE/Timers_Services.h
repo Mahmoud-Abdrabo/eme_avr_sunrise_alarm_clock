@@ -12,13 +12,13 @@
 #define   OCR2_8FREQ                                  2
 #define   OCR2_64TIMER                                4
 #define   OCR2_1U_OVERFLOW                            250
-#define   LOW                                         0
+#define   LOW                                          0
 #define   ONE_TICK                                     1
 
 #define   OVERFLOW_TIME_8PRESCALER                   64
 #include "Timers.h"
-void Timer2_SetInterruptTime_ms (uint16_t_ time);
-void Timer2_SetInterruptTime_us (uint16_t_ time);
+void delay_ms(uint16_t_ time);
+void delay_us(uint16_t_ time);
 
 
 #endif /* TIMERS_SERVICES_H_ */

@@ -14,7 +14,7 @@
 
 
 
-void Timer2_SetInterruptTime_ms (uint16_t_ time)
+void delay_ms(uint16_t_ time)
 {
 	TIMER2_OC_InterruptDisable();
 	TIMER2_SET_OCReg(OCR2_1U_OVERFLOW);//overflow every 1m
@@ -32,7 +32,7 @@ void Timer2_SetInterruptTime_ms (uint16_t_ time)
 
 
 
-void Timer2_SetInterruptTime_us (uint16_t_ time)
+void delay_us(uint16_t_ time)
 {
 	TIMER2_OC_InterruptDisable();
 	
