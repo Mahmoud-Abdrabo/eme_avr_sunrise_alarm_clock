@@ -10,6 +10,7 @@ include_directories(sunrise_alarm_clock/HAL/ldr)
 include_directories(sunrise_alarm_clock/HAL/led)
 include_directories(sunrise_alarm_clock/HAL/kpd)
 include_directories(sunrise_alarm_clock/HAL/pwm)
+include_directories(sunrise_alarm_clock/HAL/buzz)
 include_directories(sunrise_alarm_clock/MCAL/adc)
 include_directories(sunrise_alarm_clock/MCAL/timers)
 include_directories(sunrise_alarm_clock/MCAL/gpio)
@@ -50,4 +51,4 @@ add_executable(eme_avr_sunrise_alarm_clock
         sunrise_alarm_clock/HAL/pwm/pwm.c
         sunrise_alarm_clock/HAL/pwm/pwm.h
 
-)
+        sunrise_alarm_clock/HAL/buzz/buzz_interface.h)

@@ -18,7 +18,7 @@
 
 #define LDR_VALUE    CONVERT_ANALOG_TO_PERCENT(uint16_g_last_reading[LDR_ADC_CHANNEL])
 
-#define LDR_NIGHT_THRESHOLD 55
+#define LDR_PRESSED_THRESHOLD 55
 
 typedef enum
 {

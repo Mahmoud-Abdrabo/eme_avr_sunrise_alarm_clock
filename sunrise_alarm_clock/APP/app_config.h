@@ -2,7 +2,7 @@
  * app_config.h
  *
  * Created: 8/26/2023 3:48:45 PM
- *  Author: hacke
+ *  Author: Team GUCALEX
  */ 
 
 
@@ -33,9 +33,13 @@
 
 /* App Strings */
 #define APP_STR_TITLE       "    Team GUCALEX"
-#define APP_STR_CAR_OFF     "Welcome .. GUCALEX"
-#define APP_STR_CAR_READY   "Please start Motor"
-#define APP_STR_CAR_RUNNING   "Car Motor Running."
+#define APP_STR_SET_ALARM     "1. Set Alarm"
+#define APP_STR_CANCEL_ALARM   "2. Cancel Alarm"
+#define APP_STR_SHOW_ALARM   "3. Show Alarm"
+#define APP_STR_ALARM_IS_CANCELLED "Alarm Is Cancelled"
+#define SET_ALARM '1'
+#define CANCEL_ALARM '2'
+#define SHOW_ALARM '3'
 
 #define APP_CAR_BATTERY_TIMEOUT_IN_SEC  10
 

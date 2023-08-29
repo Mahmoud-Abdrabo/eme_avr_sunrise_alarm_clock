@@ -11,7 +11,7 @@ static void (*Timer1_ICU_Fptr) (void)=NULL_PTR;
 //static void (*Timer0_OVF_Fptr) (void)=NULL_PTR;
 //static void (*Timer0_OC_Fptr) (void)=NULL_PTR;
 
-/*timer 0 functions*/
+/*timers 0 functions*/
 
 
 void TIMER0_Init(Timer0Mode_type mode)
@@ -91,7 +91,7 @@ void TIMER0_OC_InterruptDisable(void)
 /*********************************Timer 0 ISR functions*********************************************/
 
 /*************************************************************************/
-/*timer 1 functions*/
+/*timers 1 functions*/
 void Timer1_Init( Timer1Mode_type mode)
 {
 	switch (mode)
