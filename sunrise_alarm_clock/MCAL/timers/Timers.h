@@ -6,7 +6,8 @@
 #include "std.h"
 #include "bit_math.h"
 #include "mem_map.h"
-
+#define F_CPU   16000000
+#include <util/delay.h>
 typedef enum{
 	TIMER0_STOP=0,
 	TIMER0_SCALER_1,
@@ -48,6 +49,55 @@ void TIMER0_OV_InterruptDisable(void);
 void TIMER0_OC_InterruptEnable(void);
 void TIMER0_OC_InterruptDisable(void);
 void TIMER0_OV_SetCallBack(void(*local_fptr)(void));
+
+
+
+/************************************************ Timer2*********************************************************/
+
+
+typedef enum{
+	TIMER2_STOP=0,
+	TIMER2_SCALER_1,
+	TIMER2_SCALER_8,
+	TIMER2_SCALER_32,
+	TIMER2_SCALER_64,
+	TIMER2_SCALER_128,
+	TIMER2_SCALER_256,
+	TIMER2_SCALER_1024,
+	
+}Timer2Scaler_type;
+
+
+typedef enum
+{
+	TIMER2_NORMAL_MODE=0,
+	TIMER2_PHASECORRECT_MODE,
+	TIMER2_CTC_MODE,
+	TIMER2_FASTPWM_MODE
+
+}Timer2Mode_type;
+
+
+typedef enum
+{
+	OC2_DISCONNECTED=0,
+	OC2_TOGGLE,
+	OC2_NON_INVERTING,
+	OC2_INVERTING
+
+}OC2Mode_type;
+
+
+void TIMER2_Init(Timer2Mode_type mode);
+void Timer2_change(Timer2Scaler_type scaler);
+void TIMER2_OC0Mode(OC2Mode_type mode);
+void TIMER2_OV_InterruptEnable(void);
+void TIMER2_OV_InterruptDisable(void);
+void TIMER2_OC_InterruptEnable(void);
+void TIMER2_OC_InterruptDisable(void);
+
+void Timer2_OVF_SetCallBack(void(*LocalFptr)(void));
+void Timer2_OC_SetCallBack(void(*LocalFptr)(void));
 
 /*********************************************************************************************************/
 
@@ -124,6 +174,5 @@ void Timer1_OCB_SetCallBack(void(*LocalFptr)(void));
 void Timer1_ICU_SetCallBack(void(*LocalFptr)(void));
 
 
-//void Timer0_OVF_SetCallBack(void(*LocalFptr)(void));
-//void Timer0_OC_SetCallBack(void(*LocalFptr)(void));
+
 #endif /* TIMERS_H_ */

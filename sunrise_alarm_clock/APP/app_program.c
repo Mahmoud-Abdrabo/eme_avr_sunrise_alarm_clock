@@ -34,9 +34,6 @@ void app_start()
 }
 
 
-
-
-
 void led_dimming(void)
 {
 	Pwm_Start();
