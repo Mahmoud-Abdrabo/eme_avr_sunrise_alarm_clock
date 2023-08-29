@@ -5,7 +5,6 @@
  *  Author: Hossam
  */
 
-#include <stdlib.h>
 #include "lcd_interface.h"
 #include "lcd_private.h"
 #include "util/delay.h"
@@ -270,22 +269,9 @@ void LCD_shiftClear(void)
         _delay_ms(LCD_MS_DELAY_SHIFT);
     }
     LCD_sendCommand(LCD_CMD_CLEAR);
-    u8_gs_cursor = ZERO;
+    u8_gs_cursor = 0;
 }
 
-void LCD_printNumber(uint16_t_ uint16_a_number, uint8_t_ lcd_line, uint8_t_ lcd_col)
-{
-    char str_buff[10] = {0};
-
-    /* Convert number to string */
-    itoa(uint16_a_number, str_buff, 10);
-
-    /* Set LCD Cursor Location */
-    LCD_setCursor(lcd_line, lcd_col);
-
-    /* print Number */
-    LCD_sendString((uint8_t_ *)str_buff);
-}
 
 void LCD_printNumberFromEnd(uint16_t_ uint16_a_number, uint8_t_ lcd_line, uint8_t_ lcd_col)
 {
