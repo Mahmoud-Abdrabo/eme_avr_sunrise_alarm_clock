@@ -10,5 +10,9 @@ void buzz_init(void)
 
 void buzz_start(void)
 {
-	 GPIO_writePin(BUZZ_PORT,  BUZZ_PIN, PIN_OUTPUT);
+	 GPIO_writePin(BUZZ_PORT,  BUZZ_PIN, LOGIC_HIGH);
+}
+void buzz_stop(void)
+{
+	 GPIO_writePin(BUZZ_PORT,  BUZZ_PIN, LOGIC_LOW);
 }

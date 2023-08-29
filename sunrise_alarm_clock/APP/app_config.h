@@ -13,23 +13,9 @@
     #define F_CPU 16000000UL
 #endif
 
-#define APP_IS_NIGHT    0           // set day/night
-
-#define APP_INTERIOR_LIGHT_ARGS         LED_RED_ARGS
-#define APP_INTERIOR_LIGHT_PORT         LED_RED_PIN
-#define APP_INTERIOR_LIGHT_PIN          LED_RED_PORT
-
-#define APP_CAR_FRONT_LEFT_LIGHT_ARGS   LED_BLUE_ARGS
-#define APP_CAR_FRONT_LEFT_LIGHT_PIN    LED_BLUE_PIN
-#define APP_CAR_FRONT_LEFT_LIGHT_PORT   LED_BLUE_PORT
-
-#define APP_CAR_FRONT_RIGHT_LIGHT_ARGS  LED_GREEN_ARGS
-#define APP_CAR_FRONT_RIGHT_LIGHT_PIN   LED_GREEN_PIN
-#define APP_CAR_FRONT_RIGHT_LIGHT_PORT  LED_GREEN_PORT
-
-
 #define  MINMUN_DUTY    5
 #define  MAXMUM_DUTY    95
+#define CURRENT_TIME (uint16_alarm_total_seconds - uint16_seconds_elapsed)
 
 /* App Strings */
 #define APP_STR_TITLE       "    Team GUCALEX"
@@ -40,7 +26,5 @@
 #define SET_ALARM '1'
 #define CANCEL_ALARM '2'
 #define SHOW_ALARM '3'
-
-#define APP_CAR_BATTERY_TIMEOUT_IN_SEC  10
 
 #endif /* APP_CONFIG_H_ */

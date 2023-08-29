@@ -16,6 +16,7 @@
 
 void buzz_init(void);
 void buzz_start(void);
+void buzz_stop(void);
 
 
 #endif /* BUZZ_INTERFACE_H_ */

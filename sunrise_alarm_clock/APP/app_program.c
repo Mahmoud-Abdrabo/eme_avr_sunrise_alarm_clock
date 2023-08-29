@@ -7,7 +7,7 @@
 
 
 #include "Led.h"
-#include "../MCAL/timer/Timers.h"
+#include "Timers.h"
 #include "pwm.h"
 #include "ldr.h"
 #include "lcd_interface.h"
@@ -32,7 +32,7 @@ static void app_keypad_initial_states(uint8_t value);
 static void app_reset_timer();
 
 /* Time elapsed */
-static uint16_t uint8_seconds_elapsed= 0;
+static uint16_t uint16_seconds_elapsed= 0;
 
 /* pressed/unpressed flag */
 static boolean bool_is_pressed= FALSE;
@@ -44,7 +44,7 @@ static uint8_t_ alarm_digit_index = 4;
 app_state g_app_state= init;
 
 /* Global alarm value */
-uint16_t uint16_alarm_total_seconds=-1;
+uint16_t uint16_alarm_total_seconds= 0;
 
 void app_init()
 {
@@ -89,17 +89,21 @@ void app_init()
 }
 void app_start()
 {
-    // app_switch_state(initial);
-
     uint8_t kpd_value;
 
     while (TRUE)
     {
+        /* Alarm has finished and Leds start dimming for some seconds then buzz will start */
+        if(uint16_seconds_elapsed == uint16_alarm_total_seconds && uint16_seconds_elapsed !=0){
+            for (int i = 1; i <=8 ; ++i)
+            {
+                app_led_dimming();
+            }
+            buzz_start();
+        }
 
         /* get keypad current value */
         kpd_value = KeyPad_GetValue();
-
-//        app_keypad_initial_states(kpd_value);
 
         /* Read LDR */
         ldr_read();
@@ -107,11 +111,26 @@ void app_start()
         /* Update is_pressed flag */
         bool_is_pressed= LDR_PRESSED_THRESHOLD > LDR_VALUE;
 
+        if(TRUE == bool_is_pressed)
+        {
+            Pwm_Stop();
+            Led_TurnOff(LED_RED_PORT, LED_RED_PIN);
+            Led_TurnOff(LED_BLUE_PORT, LED_BLUE_PIN);
+            Led_TurnOff(LED_GREEN_PORT, LED_GREEN_PIN);
+            Led_TurnOff(LED_YELLOW_PORT, LED_YELLOW_PIN);
+            buzz_stop();
+            g_app_state= show_options;
+        }
+        else
+        {
+            /* Do Nothing */
+        }
+
         switch (g_app_state)
         {
             case init:
             {
-                app_switch_state(show_options);
+                app_switch_state(init);
                 break;
             }
             case show_options:
@@ -136,16 +155,16 @@ void app_start()
                 {
                     /* Do Nothing */
                 }
-
                 break;
             }
             case set_alarm:
             {
                 /* Check for key press */
-                if(0 != kpd_value)
+                if('A' != kpd_value)
                 {
                     switch (kpd_value)
                     {
+                        case '0':
                         case '1':
                         case '2':
                         case '3':
@@ -187,15 +206,15 @@ void app_start()
                             /* update index */
                             DECREMENT(alarm_digit_index);
 
-                            if(uint16_alarm_total_seconds==uint8_seconds_elapsed)
+                            if(0 == alarm_digit_index)
                             {
-
+                                Timer1_change(TIMER1_SCALER_256);
+                                g_app_state= show_options;
                             }
                             else
                             {
-
+                                /* Do Nothing */
                             }
-
                             break;
                         }
                         default:
@@ -209,21 +228,30 @@ void app_start()
                 {
                     /* Do Nothing no key is pressed */
                 }
-                uint16_alarm_total_seconds+=1;
-                uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 * 60 ;
-                uint16_alarm_total_seconds+= KeyPad_GetValue() * 60 ;
-                uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 ;
-                uint16_alarm_total_seconds+= KeyPad_GetValue();
-
                 break;
             }
             case cancel_alarm:
             {
-
+                app_switch_state(cancel_alarm);
                 break;
             }
             case show_alarms:
             {
+                app_switch_state(show_alarms);
+
+                LCD_sendChar(CONVERT_DIGIT_TO_CHAR(CURRENT_TIME / 600));
+
+                LCD_setCursor(LCD_LINE2, LCD_COL8);
+                LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_TIME / 60) % 10));
+
+                LCD_setCursor(LCD_LINE2, LCD_COL9);
+                LCD_sendChar(':');
+
+                LCD_setCursor(LCD_LINE2, LCD_COL10);
+                LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_TIME % 60) /10));
+
+                LCD_setCursor(LCD_LINE2, LCD_COL11);
+                LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_TIME % 60) % 10));
 
                 break;
             }
@@ -245,6 +273,7 @@ static void app_switch_state(app_state state)
         {
             LCD_clear();
             LCD_sendString(APP_STR_TITLE);
+            g_app_state= show_options;
             break;
         }
         case show_options:
@@ -256,6 +285,7 @@ static void app_switch_state(app_state state)
             LCD_sendString(APP_STR_CANCEL_ALARM);
             LCD_setCursor(LCD_LINE3, LCD_COL0);
             LCD_sendString(APP_STR_SHOW_ALARM);
+            g_app_state= show_options;
             break;
         }
         case set_alarm:
@@ -265,16 +295,24 @@ static void app_switch_state(app_state state)
 
             /* reset index flag */
             alarm_digit_index = 4;
+
+            g_app_state= set_alarm;
             break;
         }
         case cancel_alarm:
         {
-            app_keypad_initial_states(CANCEL_ALARM);
+            LCD_clear();
+            LCD_setCursor(LCD_LINE2, LCD_COL1);
+            LCD_sendString(APP_STR_ALARM_IS_CANCELLED);
+            app_reset_timer();
+            g_app_state= show_options;
             break;
         }
         case show_alarms:
         {
-            app_keypad_initial_states(SHOW_ALARM);
+            LCD_clear();
+            LCD_setCursor(LCD_LINE2, LCD_COL7);
+            g_app_state= show_alarms;
             break;
         }
         default:
@@ -288,15 +326,16 @@ static void app_switch_state(app_state state)
 static void app_timer_tick_event(void)
 {
     /* Timer ticked 1 second */
-    uint8_seconds_elapsed++;
+    uint16_seconds_elapsed++;
 }
 
-static void app_reset_timer(){
+static void app_reset_timer()
+{
     /* Stop Timer */
     TIMER1_STOP();
 
     /* Reset Elapsed Time */
-    uint8_seconds_elapsed;
+    uint16_seconds_elapsed=0;
 }
 
 static void app_led_dimming(void)
@@ -314,52 +353,4 @@ static void app_led_dimming(void)
 		Set_Dutycycle(loop);
 		_delay_ms(30);
 	}
-}
-
-static void app_keypad_initial_states(uint8_t value)
-{
-    switch (value)
-    {
-        /* Set Alarm for specific amount of time */
-        case SET_ALARM:
-        {
-            LCD_clear();
-            LCD_setCursor(LCD_LINE1, LCD_COL7);
-
-            /* Write Time on LCD*/
-            //todo
-
-            /* Take this time and put it on Timer 1 */
-            // todo
-
-            TIMER1_START();
-
-            g_app_state= set_alarm;
-
-            break;
-        }
-        /* Cancel alarm and reset timer 1 to zero */
-        case CANCEL_ALARM:
-        {
-            LCD_clear();
-            LCD_setCursor(LCD_LINE1, LCD_COL1);
-            LCD_sendString(APP_STR_ALARM_IS_CANCELLED);
-            app_reset_timer();
-            break;
-        }
-        /* Show Alarm and display the time counting */
-        case SHOW_ALARM:
-        {
-            LCD_clear();
-            LCD_setCursor(LCD_LINE1, LCD_COL7);
-            /* Show the Time counting as 04:56 */
-            // todo
-            break;
-        }
-        default:
-        {
-            /* Do Nothing */
-            break;
-        }
-    }
 }

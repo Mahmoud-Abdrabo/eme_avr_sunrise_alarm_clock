@@ -11,6 +11,7 @@
 
 
 #define CONVERT_CHAR_TO_DIGIT(kpd_value) (kpd_value - '0')
+#define CONVERT_DIGIT_TO_CHAR(kpd_value) (kpd_value + '0')
 
 void app_init();
 void app_start();
