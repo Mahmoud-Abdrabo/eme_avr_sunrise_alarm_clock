@@ -156,6 +156,11 @@ void TIMER2_OC_InterruptDisable(void)
 	CLR_BIT(TIMSK,OCIE2);
 }
 
+void TIMER2_SET_OCReg(uint8_t_ oc_value)
+{
+	OCR2=oc_value;
+}
+
 
 /*************************************************************************/
 /*timer 1 functions*/

@@ -17,7 +17,7 @@
 void Timer2_SetInterruptTime_ms (uint16_t_ time)
 {
 	TIMER2_OC_InterruptDisable();
-	OCR2 = OCR2_1U_OVERFLOW; //count 1m
+	TIMER2_SET_OCReg(OCR2_1U_OVERFLOW);//overflow every 1m
 	Timer2_change(TIMER2_SCALER_64);	
 	while(time!=LOW)
 	{
@@ -38,9 +38,7 @@ void Timer2_SetInterruptTime_us (uint16_t_ time)
 	
 	 if(time <= OVERFLOW_TIME_8PRESCALER)
 	 {
-		 
-		 OCR2 = (time * OCR2_8FREQ)-1;
-		
+		 TIMER2_SET_OCReg(((time * OCR2_8FREQ)-ONE_TICK));
 		 Timer2_change(TIMER2_SCALER_8);
 		 while(GET_BIT(TIFR,OCF2)==LOW);
 		 SET_BIT(TIFR,OCF2);
@@ -50,8 +48,7 @@ void Timer2_SetInterruptTime_us (uint16_t_ time)
 	 
 	 else
 	 {
-		 
-		 OCR2 = ((time/ OCR2_64TIMER))-1;
+		  TIMER2_SET_OCReg(((time/ OCR2_64TIMER)-ONE_TICK));
 		 Timer2_change(TIMER2_SCALER_64);
 		 while(GET_BIT(TIFR,OCF2)==LOW);
 		  SET_BIT(TIFR,OCF2);

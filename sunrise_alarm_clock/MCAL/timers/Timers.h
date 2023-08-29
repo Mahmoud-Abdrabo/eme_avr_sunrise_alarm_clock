@@ -6,8 +6,8 @@
 #include "std.h"
 #include "bit_math.h"
 #include "mem_map.h"
-#define F_CPU   16000000
-#include <util/delay.h>
+
+
 typedef enum{
 	TIMER0_STOP=0,
 	TIMER0_SCALER_1,
@@ -95,7 +95,7 @@ void TIMER2_OV_InterruptEnable(void);
 void TIMER2_OV_InterruptDisable(void);
 void TIMER2_OC_InterruptEnable(void);
 void TIMER2_OC_InterruptDisable(void);
-
+void TIMER2_SET_OCReg(uint8_t_ oc_value);
 
 
 /*********************************************************************************************************/
