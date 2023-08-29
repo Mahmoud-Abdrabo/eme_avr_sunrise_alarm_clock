@@ -16,6 +16,7 @@
 
 void Timer2_SetInterruptTime_ms (uint16_t_ time)
 {
+	TIMER2_OC_InterruptDisable();
 	OCR2 = OCR2_1U_OVERFLOW; //count 1m
 	Timer2_change(TIMER2_SCALER_64);	
 	while(time!=LOW)
@@ -33,6 +34,8 @@ void Timer2_SetInterruptTime_ms (uint16_t_ time)
 
 void Timer2_SetInterruptTime_us (uint16_t_ time)
 {
+	TIMER2_OC_InterruptDisable();
+	
 	 if(time <= OVERFLOW_TIME_8PRESCALER)
 	 {
 		 
