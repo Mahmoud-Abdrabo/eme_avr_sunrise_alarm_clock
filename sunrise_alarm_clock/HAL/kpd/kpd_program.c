@@ -7,38 +7,47 @@
 
 #include "kpd_config.h"
 #include "kpd_interface.h"
-#include "timer_interface.h"
+#include "util/delay.h"
 
 const uint8_t_ keypad_values[4][4] = {
-        {'1','2','3','4'},
-        {'5','6','7','8'},
-        {'9','A','B','C'},
-        {'D','E','F','G'},
+        {'1','2','3','A'},
+        {'4','5','6','B'},
+        {'7','8','9','C'},
+        {'+','0','-','D'},
 };
 
-const enu_dio_pin_t_ keypad_cols[4] = {
-    DIO_PIN_7,
-     DIO_PIN_6,
-     DIO_PIN_5,
-     DIO_PIN_3
+const uint8_t_ keypad_cols[KEYPAD_COLS_TOTAL] = {
+        PIN7_ID,
+        PIN6_ID,
+        PIN5_ID,
+        PIN3_ID
 };
 
-const enu_dio_pin_t_ keypad_rows[4] = {
-        DIO_PIN_5,
-        DIO_PIN_4,
-        DIO_PIN_3,
-        DIO_PIN_2
+const uint8_t_ keypad_rows[KEYPAD_ROWS_TOTAL] = {
+        PIN5_ID,
+        PIN4_ID,
+        PIN3_ID,
+        PIN2_ID
 };
 
 
 void KeyPad_Init(void)
 {
-    dio_port_init( KEYPAD_COLUMN_PORT , DIO_PORT_IN , KEYPAD_COL_MASK);
-    dio_port_init( KEYPAD_ROW_PORT , DIO_PORT_IN , KEYPAD_ROW_MASK);
+    /* init rows */
+    for (int i = 0; i < KEYPAD_ROWS_TOTAL; ++i) {
+        /* init pin as input */
+        GPIO_setupPinDirection( KEYPAD_ROW_PORT , keypad_rows[i] , PIN_INPUT);
+        /* enable pin pull up */
+        GPIO_writePin( KEYPAD_ROW_PORT , keypad_rows[i] , LOGIC_HIGH);
+    }
 
-    dio_port_write(KEYPAD_ROW_PORT , DIO_PORT_HIGH , KEYPAD_ROW_MASK);
+    /* init columns */
+    for (int i = 0; i < KEYPAD_ROWS_TOTAL; ++i)
+    {
+        /* init pin as input */
+        GPIO_setupPinDirection( KEYPAD_COLUMN_PORT , keypad_rows[i] , PIN_INPUT);
+    }
 
-    TIMER_timer0NormalModeInit(DISABLED);
 }
 
 
@@ -49,26 +58,25 @@ uint8_t_ KeyPad_GetValue(void) {
     {
 
         /* set row as output -> low */
-        dio_init(KEYPAD_ROW_PORT, keypad_rows[row], DIO_OUT);
-        dio_write(KEYPAD_ROW_PORT, keypad_rows[row], DIO_PIN_LOW);
-
+        GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[row], PIN_OUTPUT);
+        GPIO_writePin(KEYPAD_ROW_PORT, keypad_rows[row], LOGIC_LOW);
 
         for (int col = 0; col < KEYPAD_COLS_TOTAL; ++col)
         {
-            enu_dio_pin_val_t_ enu_dio_pin_val = DIO_PIN_HIGH;
+            uint8_t_ u8_l_dio_pin_val = LOGIC_HIGH;
 
-            dio_read(KEYPAD_COLUMN_PORT, keypad_cols[col], &enu_dio_pin_val);
+            u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[col]);
 
-            if (enu_dio_pin_val == DIO_PIN_LOW) {
-
+            if (u8_l_dio_pin_val == LOGIC_LOW)
+            {
                 /* debounce */
-                TIMER_delay_ms(100);
+                _delay_ms(KEYPAD_DEBOUNCE_DELAY_MS);
 
-                dio_read(KEYPAD_COLUMN_PORT, keypad_cols[col], &enu_dio_pin_val);
-                if (enu_dio_pin_val == DIO_PIN_LOW)
+                u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[col]);
+                if (u8_l_dio_pin_val == LOGIC_LOW)
                 {
                     /* revert row to input */
-                    dio_init(KEYPAD_ROW_PORT, keypad_rows[row], DIO_IN);
+                    GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[row], PIN_INPUT);
 
 
                     /* return */
@@ -78,7 +86,7 @@ uint8_t_ KeyPad_GetValue(void) {
         }
 
         /* revert row to input */
-        dio_init(KEYPAD_ROW_PORT, keypad_rows[row], DIO_IN);
+        GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[row], PIN_INPUT);
     }
 
     return uint8_val_retval;
