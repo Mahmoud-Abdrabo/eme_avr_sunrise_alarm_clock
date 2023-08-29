@@ -14,7 +14,7 @@
 #define  BUZZ_PORT         PORTC_ID 
 #define  BUZZ_PIN          PIN6_ID 
 
-void buzz_inti(void);
+void buzz_init(void);
 void buzz_start(void);
 
 

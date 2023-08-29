@@ -3,7 +3,7 @@
 
 #include "buzz_interface.h"
 
-void buzz_inti(void)
+void buzz_init(void)
 {
 	GPIO_setupPinDirection(BUZZ_PORT , BUZZ_PIN ,PIN_OUTPUT);
 }

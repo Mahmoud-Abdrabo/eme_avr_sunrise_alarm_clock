@@ -51,4 +51,4 @@ add_executable(eme_avr_sunrise_alarm_clock
         sunrise_alarm_clock/HAL/pwm/pwm.c
         sunrise_alarm_clock/HAL/pwm/pwm.h
 
-        sunrise_alarm_clock/HAL/buzz/buzz_interface.h)
+        sunrise_alarm_clock/HAL/buzz/buzz_interface.h sunrise_alarm_clock/HAL/buzz/buzz_program.c)

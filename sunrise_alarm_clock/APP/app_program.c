@@ -24,7 +24,7 @@ typedef enum
     show_alarms
 } app_state;
 
-static void led_dimming(void);
+static void app_led_dimming(void);
 static void app_switch_state(app_state state);
 static void app_timer_tick_event(void);
 static void app_keypad_initial_states(uint8_t value);
@@ -38,6 +38,9 @@ static boolean bool_is_pressed= FALSE;
 
 /* Initial Alarm state */
 app_state g_app_state= initial;
+
+/* Global alarm value */
+uint16_t uint16_alarm_total_seconds=-1;
 
 void app_init()
 {
@@ -59,7 +62,7 @@ void app_init()
     Pwm_Init(Led_Arr);
 
     /* Init Buzz */
-    buzz_inti();
+    buzz_init();
 
     /* Init KPD */
     KeyPad_Init();
@@ -84,11 +87,17 @@ void app_start()
 {
     app_switch_state(initial);
 
+    uint8_t kpd_value;
+
     while (TRUE){
+
+        kpd_value= KeyPad_GetValue();
+        app_keypad_initial_states(kpd_value);
+
         /* Read LDR */
         ldr_read();
 
-        /* Update is pressed flag */
+        /* Update is_pressed flag */
         bool_is_pressed= LDR_PRESSED_THRESHOLD > LDR_VALUE;
 
         switch (g_app_state)
@@ -100,7 +109,7 @@ void app_start()
             }
             case set_alarm:
             {
-
+                app_switch_state(set_alarm);
                 break;
             }
             case cancel_alarm:
@@ -141,13 +150,17 @@ static void app_switch_state(app_state state)
             LCD_sendString(APP_STR_CANCEL_ALARM);
             LCD_setCursor(LCD_LINE3, LCD_COL0);
             LCD_sendString(APP_STR_SHOW_ALARM);
-            uint8_t kpd_value= KeyPad_GetValue();
-            app_keypad_initial_states(kpd_value);
             break;
         }
         case set_alarm:
         {
-            app_keypad_initial_states(SET_ALARM);
+            LCD_clear();
+            LCD_setCursor(LCD_LINE1, LCD_COL7);
+            uint16_alarm_total_seconds+=1;
+            uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 * 60 ;
+            uint16_alarm_total_seconds+= KeyPad_GetValue() * 60 ;
+            uint16_alarm_total_seconds+= KeyPad_GetValue() * 10 ;
+            uint16_alarm_total_seconds+= KeyPad_GetValue();
             break;
         }
         case cancel_alarm:
@@ -182,7 +195,7 @@ static void app_reset_timer(){
     uint8_seconds_elapsed;
 }
 
-static void led_dimming(void)
+static void app_led_dimming(void)
 {
 	Pwm_Start();
 	uint8_t_ loop;
