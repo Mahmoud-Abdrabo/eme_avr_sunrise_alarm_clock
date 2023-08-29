@@ -9,6 +9,10 @@
 #ifndef APP_CONFIG_H_
 #define APP_CONFIG_H_
 
+#ifndef F_CPU
+    #define F_CPU 16000000UL
+#endif
+
 #define APP_IS_NIGHT    0           // set day/night
 
 #define APP_INTERIOR_LIGHT_ARGS         LED_RED_ARGS

@@ -160,6 +160,15 @@
     <Compile Include="HAL\buzz\buzz_program.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\kpd\kpd_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\kpd\kpd_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\kpd\kpd_program.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="HAL\lcd\lcd_config.h">
       <SubType>compile</SubType>
     </Compile>
