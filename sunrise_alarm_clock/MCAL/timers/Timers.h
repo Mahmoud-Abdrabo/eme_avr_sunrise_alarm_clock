@@ -96,8 +96,7 @@ void TIMER2_OV_InterruptDisable(void);
 void TIMER2_OC_InterruptEnable(void);
 void TIMER2_OC_InterruptDisable(void);
 
-void Timer2_OVF_SetCallBack(void(*LocalFptr)(void));
-void Timer2_OC_SetCallBack(void(*LocalFptr)(void));
+
 
 /*********************************************************************************************************/
 

@@ -8,9 +8,7 @@ static void (*Timer1_OCA_Fptr) (void)=NULL_PTR;
 static void (*Timer1_OCB_Fptr) (void)=NULL_PTR;
 static void (*Timer1_ICU_Fptr) (void)=NULL_PTR;
 /******************************************************************************************/
-/*************************Pointer to functions to be assigned to ISR*********************************/
-static void (*Timer2_OVF_Fptr) (void)=NULL_PTR;
-static void (*Timer2_OC_Fptr) (void)=NULL_PTR;
+
 
 /*timer 0 functions*/
 
@@ -328,16 +326,6 @@ void Timer1_ICU_SetCallBack(void(*LocalFptr)(void))
 
 /*********************************Timer 2 ISR functions*********************************************/
 
-void Timer2_OVF_SetCallBack(void(*LocalFptr)(void))
-{
-	Timer2_OVF_Fptr=LocalFptr;
-}
-void Timer2_OC_SetCallBack(void(*LocalFptr)(void))
-{
-	Timer2_OC_Fptr=LocalFptr;
-}
-
-
 /*********************************Timer 1 ISR functions*********************************************/
 ISR(TIMER1_OVF_vect)
 {
@@ -374,17 +362,3 @@ ISR(TIMER1_ICU_vect)
 
 
 
-ISR(TIMER2_OVF_vect)
-{
-	if(Timer2_OVF_Fptr!=NULL_PTR)
-	{
-		Timer2_OVF_Fptr();
-	}
-}
-ISR(TIMER2_COMP_vect)
-{
-	if(Timer2_OC_Fptr!=NULL_PTR)
-	{
-		Timer2_OC_Fptr();
-	}
-}
