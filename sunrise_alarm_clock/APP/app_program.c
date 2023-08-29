@@ -25,6 +25,8 @@ void app_init()
 	timer_init();
 	Timer1_Init(TIMER1_NORMAL_MODE);
 	Timer1_OVF_InterruptEnable();
+	TIMER2_Init(TIMER2_CTC_MODE);
+	TIMER2_OC0Mode(OC2_DISCONNECTED);
 	
 	
 }
