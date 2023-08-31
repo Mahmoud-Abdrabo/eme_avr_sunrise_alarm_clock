@@ -10,7 +10,7 @@
 #define KPD_INTERFACE_H_
 
 
-void KeyPad_Init(void);
-uint8_t_ KeyPad_GetValue(void);
+void keypad_init(void);
+uint8_t_ keypad_read(void);
 
 #endif /* KPD_INTERFACE_H_ */

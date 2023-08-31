@@ -8,7 +8,7 @@
 
 #ifndef LDR_H_
 #define LDR_H_
-#include "ldr.h"
+#include "ldr_interface.h"
 #include "std.h"
 #include "adc_interface.h"
 

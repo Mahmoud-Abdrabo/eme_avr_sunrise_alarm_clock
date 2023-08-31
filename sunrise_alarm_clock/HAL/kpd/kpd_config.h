@@ -17,8 +17,8 @@
 //#define KEYPAD_COL_MASK     DIO_MASK_BITS_3_5_6_7
 //#define KEYPAD_ROW_MASK     DIO_MASK_BITS_2_3_4_5
 
-#define KEYPAD_DEBOUNCE_DELAY_MS 100
-#define KEYPAD_COLS_TOTAL 4
-#define KEYPAD_ROWS_TOTAL 4
+#define KEYPAD_DEBOUNCE_DELAY_MS    100
+#define KEYPAD_COLS_TOTAL           4
+#define KEYPAD_ROWS_TOTAL           4
 
 #endif

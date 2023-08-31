@@ -4,7 +4,7 @@
  * Created: 8/27/2023 9:21:31 AM
  *  Author: Hossam Elwahsh
  */
-#include "ldr.h"
+#include "ldr_interface.h"
 
 en_ldr_status_t ldr_init()
 {

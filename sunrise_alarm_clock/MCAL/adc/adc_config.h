@@ -10,7 +10,7 @@
 #define ADC_CONFIG_H_
 
 
-#define ADC_CPU_FREQ_HZ         16000000    // 16   MHz
+#define ADC_CPU_FREQ_HZ         16000000UL  // 16   MHz
 #define ADC_MAX_FREQ_HZ         200000      // 200  KHz
 #define ADC_PORT                PORTA_ID
 
