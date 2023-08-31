@@ -7,6 +7,7 @@
 
 #include "kpd_config.h"
 #include "kpd_interface.h"
+#define  F_CPU    16000000
 #include "util/delay.h"
 
 const uint8_t_ keypad_values[4][4] = {
@@ -52,7 +53,7 @@ void KeyPad_Init(void)
 
 
 uint8_t_ KeyPad_GetValue(void) {
-    uint8_t_ uint8_val_retval = 0;
+    uint8_t_ uint8_val_retval = 'A';
 
     for (int row = 0; row < KEYPAD_ROWS_TOTAL; ++row)
     {
@@ -80,6 +81,7 @@ uint8_t_ KeyPad_GetValue(void) {
 
 
                     /* return */
+					//_delay_ms(300);
                     return keypad_values[row][col];
                 }
             }
