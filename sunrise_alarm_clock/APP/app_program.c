@@ -455,13 +455,13 @@ static void app_led_dimming(void)
 	for (u8_l_counter = MINIMUM_DUTY ; u8_l_counter <= MAXIMUM_DUTY ; u8_l_counter = u8_l_counter + 5)
 	{
         pwm_set_duty(u8_l_counter);
-		_delay_ms(50);
+		delay_ms(50);
 	}
 
     /* Dim LEDs down */
 	for (u8_l_counter = MAXIMUM_DUTY ; u8_l_counter >= MINIMUM_DUTY ; u8_l_counter = u8_l_counter - 5)
 	{
         pwm_set_duty(u8_l_counter);
-		_delay_ms(50);
+        delay_ms(50);
 	}
 }
