@@ -265,10 +265,5 @@
     <Folder Include="MCAL\timers" />
     <Folder Include="SERVICE" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="APP\app_program.c~">
-      <SubType>compile</SubType>
-    </None>
-  </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>
