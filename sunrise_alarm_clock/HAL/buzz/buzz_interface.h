@@ -15,7 +15,7 @@
 #define  BUZZ_PIN          PIN6_ID 
 
 void buzz_init(void);
-void buzz_start(void);
+void buzz_on(void);
 void buzz_stop(void);
 
 

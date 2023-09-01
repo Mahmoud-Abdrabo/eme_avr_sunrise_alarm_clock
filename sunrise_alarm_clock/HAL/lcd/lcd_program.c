@@ -263,7 +263,8 @@ void LCD_clear(void)
  */
 void LCD_shiftClear(void)
 {
-    for (int i = 0; i < LCD_LINE_COLS; ++i) {
+    for (int i = 0; i < LCD_LINE_COLS; ++i)
+    {
         LCD_sendCommand(LCD_CMD_DISP_SHIFT_RIGHT);
         _delay_ms(LCD_MS_DELAY_SHIFT);
     }

@@ -2,7 +2,7 @@
  * app_config.h
  *
  * Created: 8/26/2023 3:48:45 PM
- *  Author: hacke
+ *  Author: Hossam Elwahsh
  */ 
 
 
@@ -14,21 +14,27 @@
 #define F_CPU 16000000UL
 #endif
 
-#define  MINIMUM_DUTY    5
-#define  MAXIMUM_DUTY    95
-#define CURRENT_TIME (uint16_alarm_total_seconds - uint16_seconds_elapsed)
+#define APP_LED_DIM_STEP                5
+#define APP_LED_MINIMUM_DUTY            5
+#define APP_LED_MAXIMUM_DUTY            95
+#define APP_RING_CYCLES_DURATION_MS     50
+#define APP_RING_CYCLES_TILL_BUZZ_ON    200
 
 /* App Strings */
-#define APP_STR_TITLE               "    Team GUCALEX"
-#define APP_STR_SET_ALARM           "1. Set Alarm"
-#define APP_STR_CANCEL_ALARM        "2. Cancel Alarm"
-#define APP_STR_SHOW_ALARM          "3. Show Alarm"
-#define APP_STR_ALARM_IS_CANCELLED  "Alarm Is Cancelled"
-#define APP_STR_ALARM_SET           "Alarm Set"
-#define APP_STR_ALARM_PLACEHOLDER   "_*:**"
+#define APP_STR_TITLE               (uint8_t_ *)"    Team GUCALEX"
+#define APP_STR_SET_ALARM           (uint8_t_ *)"1. Set Alarm"
+#define APP_STR_CANCEL_ALARM        (uint8_t_ *)"2. Cancel Alarm"
+#define APP_STR_SHOW_ALARM          (uint8_t_ *)"3. Show Alarm"
+#define APP_STR_ALARM_IS_CANCELLED  (uint8_t_ *)"Alarm Is Cancelled"
+#define APP_STR_CHOOSE_ALARM        (uint8_t_ *)"Choose Alarm: (0-9)"
+#define APP_STR_ALARM               (uint8_t_ *)"Alarm "
+#define APP_STR_ALARM_RINGING       (uint8_t_ *)"WakeUp!"
+#define APP_STR_ALARM_SET           (uint8_t_ *)"Alarm Set"
+#define APP_STR_ALARM_DISABLED      (uint8_t_ *)"Alarm is  disabled"
+#define APP_STR_ALARM_PLACEHOLDER   (uint8_t_ *)"_*:**"
 
 /* App Delays */
-#define APP_DELAY_MS_MSG_TIMEOUT 2000
+#define APP_DELAY_MS_MSG_TIMEOUT 1000
 
 #define KPD_SET_ALARM       '1'
 #define KPD_CANCEL_ALARM    '2'

@@ -2,7 +2,7 @@
  * adc_interface.h
  *
  * Created: 8/24/2023 11:32:38 AM
- *  Author: hacke
+ *  Author: Hossam Elwahsh
  */ 
 
 

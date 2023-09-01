@@ -5,56 +5,55 @@
  *  Author: Team GUCALEX
  */
 
-
-#include "Led.h"
-#include "Timers.h"
-#include "pwm_interface.h"
-#include "lcd_interface.h"
-#include "app_interface.h"
-#include "app_config.h"
-#include "ldr_interface.h"
-#include "buzz_interface.h"
-#include "kpd_interface.h"
+/* App Includes */
 #include "app_interface.h"
 #include "app_config.h"
 #include "app_private.h"
 
+/* HAL */
+#include "Led.h"
+#include "pwm_interface.h"
+#include "lcd_interface.h"
+#include "ldr_interface.h"
+#include "buzz_interface.h"
+#include "kpd_interface.h"
+
+/* COMMON */
+#include "Timers.h"
 
 typedef enum
 {
-	init= 0,
-	show_options,
-	set_alarm,
-	cancel_alarm,
-	show_alarms
-} app_state;
+	APP_STATE_INIT          =   0   ,
+	APP_STATE_SHOW_OPTIONS          ,
+	APP_STATE_CHOOSE_ALARM          ,
+	APP_STATE_SET_ALARM             ,
+	APP_STATE_CANCEL_ALARM          ,
+	APP_STATE_SHOW_ALARM            ,
+//    APP_STATE_INIT_RINGING          ,
+    APP_STATE_ALARM_RINGING         ,
+    APP_STATE_TOTAL
+}en_app_state_t;
 
-static void app_led_dimming(void);
-static void app_switch_state(app_state state);
-static void app_timer_tick_event(void);
-static void app_keypad_initial_states(uint8_t value);
-static void app_reset_timer();
+static void app_switch_state        (en_app_state_t state)  ;
+static void app_timer_tick_event    (void)                  ;
 
+static uint8_t_                 uint8_gs_current_alarm_index    =   ZERO            ;
+static uint8_t_                 uint8_gs_current_ringing_alarm  =   ZERO            ;
+static uint16_t                 uint16_seconds_elapsed          =   ZERO            ;
 
-boolean bool_g_check_flag = FALSE;
-/* Time elapsed */
-static uint16_t uint16_seconds_elapsed = 0;
+/* Flags */
+static boolean                  bool_gs_stop_alarm_pressed      =   FALSE           ;
+//static boolean                  bool_gs_alarm_ringing           =   FALSE           ;
+/* App state */
+static en_app_state_t           en_gs_app_state                 =   APP_STATE_INIT  ;
+static en_app_state_t           en_gs_next_app_state            =   APP_STATE_INIT  ;
 
-/* pressed/unpressed flag */
-static boolean bool_is_pressed= FALSE;
-
-/* Global alarm index */
-static uint8_t_ alarm_digit_index = 4;
-
-/* Initial Alarm state */
-app_state g_app_state= init;
-
-/* Global alarm value */
-uint16_t uint16_alarm_total_seconds = 0;
+/* App Alarms */
+static st_app_alarms_config_t   st_gs_app_alarms_config                             ;
 
 void app_init()
 {
-	
+
 	/* Init LCD */
 	LCD_init();
 
@@ -62,9 +61,9 @@ void app_init()
 	ldr_init();
 
 	/* Init LEDs */
-	Led_Init(LED_RED_PORT, LED_RED_PIN);
-	Led_Init(LED_BLUE_PORT, LED_BLUE_PIN);
-	Led_Init(LED_GREEN_PORT, LED_GREEN_PIN);
+	Led_Init(LED_RED_PORT   , LED_RED_PIN   );
+	Led_Init(LED_BLUE_PORT  , LED_BLUE_PIN  );
+	Led_Init(LED_GREEN_PORT , LED_GREEN_PIN );
 	Led_Init(LED_YELLOW_PORT, LED_YELLOW_PIN);
 
 	/* Init PWM */
@@ -76,130 +75,148 @@ void app_init()
 	/* Init KPD */
     keypad_init();
 
-	/* Init Timer 1 with normal mode */
-	Timer1_Init(TIMER1_NORMAL_MODE);
-
-    INIT_DELAY_TIMER();
-
-	/* Enable Timer 1 Overflow */
-	Timer1_OVF_InterruptEnable();
+    /* Init timers */
+    APP_INIT_SYS_TICK_TIMER();
+    APP_INIT_DELAY_TIMER();
 
 	/* Enable Interrupt */
 	sei();
 
 	/* Set Timer Callback */
 	Timer1_OVF_SetCallBack(app_timer_tick_event);
-	
+
 }
+
+
 void app_start()
 {
-	uint8_t kpd_value = NULL;
+    /* Local Variables */
+    uint8_t uint8_kpd_value         ,
+            uint8_current_pwm_duty  ,
+            uint8_loop_counter      ,
+            uint8_alarm_digit_index ;
+
+    /* Loop counter for simulating LEDs */
+    uint16_t_ uint16_led_dimmer_counter ;
+
+    /* Flag for LEDs dimming, TRUE: LEDs fading out, FALSE: LEDs lighting up */
+    boolean bool_is_dimming_down;
+
+    /* Init Local Variables */
+    uint8_kpd_value             = NULL                      ;
+    uint16_led_dimmer_counter   = ZERO                      ;
+    uint8_alarm_digit_index     = APP_ALARM_DIGITS          ;
+    uint8_current_pwm_duty      = APP_LED_MINIMUM_DUTY      ;
+    bool_is_dimming_down        = FALSE                     ;
+
+    /* Start sys tick timer */
+    APP_START_SYS_TICK_TIMER();
 
 	while (TRUE)
 	{
-		/* Alarm has finished and Leds start dimming for some seconds then buzz will start */
-		if(
-                (uint16_seconds_elapsed == uint16_alarm_total_seconds) &&
-                (uint16_seconds_elapsed != ZERO)
-                )
+        /* Check and update alarms ticks */
+        for (uint8_loop_counter = 0; uint8_loop_counter < APP_SUPPORTED_ALARMS_COUNT; ++uint8_loop_counter)
         {
-            /* Reset timers */
-			app_reset_timer();
+            if(
+                    (TRUE == GET_ALARM_IS_ENABLED(uint8_loop_counter)) &&
+                    (FALSE == GET_ALARM_IS_RINGING(uint8_loop_counter))
+                    )
+            {
+                if(     (ZERO == GET_ALARM_SECONDS(uint8_loop_counter)) &&
+                        (en_gs_app_state != APP_STATE_ALARM_RINGING) /* no other alarm is currently ringing */
+                        )
+                {
+                    /* Update current Alarm */
+                    SET_CURRENT_RINGING_ALARM(uint8_loop_counter);
 
-            /* Loop over */
-			for (int i = 1; i <= 8 ; ++i)
-			{
-				app_led_dimming();
-			}
-			buzz_start();
-		}
+                     /* Set alarm to ringing */
+                    GET_ALARM_IS_RINGING(uint8_loop_counter) = TRUE;
 
-		/* get keypad current value */
-		kpd_value = keypad_read();
+//                     /* Set global state to ringing */
+//                    bool_gs_alarm_ringing = TRUE;
+
+                     /* Reset led dimming flags */
+                    uint16_led_dimmer_counter   = ZERO                  ;
+                    uint8_current_pwm_duty      = APP_LED_MINIMUM_DUTY  ;
+                    bool_is_dimming_down        = FALSE                 ;
+
+                     /* Set PWM duty */
+                    pwm_set_duty(uint8_current_pwm_duty);
+
+                     /* Start PWM */
+                    pwm_start();
+
+                     /* Switch to ringing mode */
+                    app_switch_state(APP_STATE_ALARM_RINGING);
+                    break;
+
+                }
+                else
+                {
+                     /* Decrement alarm counter */
+                    /*DECREMENT(GET_ALARM_SECONDS(uint8_loop_counter));*/
+                }
+            } /* end if */
+            else
+            {
+                /* Continue */
+            } /* end else */
+        } /* end for loop */
+
+        /* get keypad current value */
+		uint8_kpd_value = keypad_read();
 
 		/* Read LDR */
 		ldr_read();
 
-		/* Update is_pressed flag */
-		bool_is_pressed = LDR_PRESSED_THRESHOLD > LDR_VALUE;
-
-		if(TRUE == bool_is_pressed)
+		switch (en_gs_app_state)
 		{
-            /* Stop PWM */
-            pwm_stop();
-
-            /* Turn off LEDs */
-			Led_TurnOff(LED_RED_PORT, LED_RED_PIN);
-			Led_TurnOff(LED_BLUE_PORT, LED_BLUE_PIN);
-			Led_TurnOff(LED_GREEN_PORT, LED_GREEN_PIN);
-			Led_TurnOff(LED_YELLOW_PORT, LED_YELLOW_PIN);
-
-            /* Stop Buzzer */
-            buzz_stop();
-
-            /* Switch to show options UI/state */
-            app_switch_state(show_options);
-		}
-		else
-		{
-			/* Do Nothing */
-		}
-
-		switch (g_app_state)
-		{
-			case init:
+			case APP_STATE_INIT:
 			{
-				app_switch_state(init);
+				app_switch_state(APP_STATE_INIT);
 				break;
 			}
-			case show_options:
+			case APP_STATE_SHOW_OPTIONS:
 			{
-				if(FALSE == bool_g_check_flag)
+                /* if set button is pressed */
+                if(KPD_SET_ALARM == uint8_kpd_value)
                 {
-					app_switch_state(show_options);
-                    bool_g_check_flag = TRUE;
-				}
-				else
-				{
-					/* if set button is pressed */
-					if(KPD_SET_ALARM == kpd_value)
-					{
-                        bool_g_check_flag = FALSE;
+                    /* Update flag */
+                    en_gs_next_app_state = APP_STATE_SET_ALARM;
 
-						/* Switch state to set alarm */
-						app_switch_state(set_alarm);
-						
-						
-					}
-					else if(KPD_CANCEL_ALARM == kpd_value)
-					{
-                        bool_g_check_flag = FALSE;
-						/* Switch state to cancel alarm */
-						app_switch_state(cancel_alarm);
-						
-						
-					}
-					else if(KPD_SHOW_ALARM == kpd_value)
-					{
-                        bool_g_check_flag = FALSE;
-						/* Switch state to show alarm */
-						app_switch_state(show_alarms);
-						
-					}
-					else
-					{
-						/* Do Nothing */
-					}
-					break;
-				}
-				
-			}
-			case set_alarm:
+                    /* Switch state to choose alarm to select which alarm to set */
+                    app_switch_state(APP_STATE_CHOOSE_ALARM);
+                }
+                else if(KPD_CANCEL_ALARM == uint8_kpd_value)
+                {
+                    /* Update flag */
+                    en_gs_next_app_state = APP_STATE_CANCEL_ALARM;
+
+                    /* Switch app state  */
+                    app_switch_state(APP_STATE_CHOOSE_ALARM);
+
+                }
+                else if(KPD_SHOW_ALARM == uint8_kpd_value)
+                {
+                    /* Update flag */
+                    en_gs_next_app_state = APP_STATE_SHOW_ALARM;
+
+                    /* Switch app state  */
+                    app_switch_state(APP_STATE_CHOOSE_ALARM);
+
+                }
+                else
+                {
+                    /* Do Nothing */
+                }
+                break;
+            }
+			case APP_STATE_SET_ALARM:
 			{
 				/* Check for key press */
-				if(NULL != kpd_value)
+				if(NULL != uint8_kpd_value)
 				{
-					switch (kpd_value)
+					switch (uint8_kpd_value)
 					{
 						case '0':
 						case '1':
@@ -213,41 +230,45 @@ void app_start()
 						case '9':
 						{
 							/* Parse Numbers */
-							if(4 == alarm_digit_index)
+							if(4 == uint8_alarm_digit_index)
 							{
                                 /* Show pressed key on LCD */
-                                LCD_sendChar(kpd_value);
-								uint16_alarm_total_seconds = CONVERT_CHAR_TO_DIGIT(kpd_value) * 10 * 60;
+                                LCD_sendChar(uint8_kpd_value);
+                                CURRENT_ALARM_SECONDS = CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 10 * 60;
 
 							}
-							else if(3 == alarm_digit_index)
+							else if(3 == uint8_alarm_digit_index)
 							{
 								/* Show pressed key on LCD */
-								LCD_sendChar(kpd_value);
+								LCD_sendChar(uint8_kpd_value);
 								LCD_sendChar(':');
-								uint16_alarm_total_seconds += CONVERT_CHAR_TO_DIGIT(kpd_value) * 60;
+                                CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 60;
 							}
-							else if(2 == alarm_digit_index)
+							else if(2 == uint8_alarm_digit_index)
 							{
                                 /* Show pressed key on LCD */
-								LCD_sendChar(kpd_value);
-								uint16_alarm_total_seconds += CONVERT_CHAR_TO_DIGIT(kpd_value) * 10;
+								LCD_sendChar(uint8_kpd_value);
+                                CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 10;
 
 							}
-							else if(1 == alarm_digit_index)
+							else if(1 == uint8_alarm_digit_index)
 							{
                                 /* Show pressed key on LCD */
-								LCD_sendChar(kpd_value);
-								uint16_alarm_total_seconds += CONVERT_CHAR_TO_DIGIT(kpd_value);
+								LCD_sendChar(uint8_kpd_value);
+                                CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value);
 							}
 
-							DECREMENT(alarm_digit_index);
 
-							if(0 == alarm_digit_index)
+							DECREMENT(uint8_alarm_digit_index);
+
+							if(0 == uint8_alarm_digit_index)
 							{
-								Timer1_change(TIMER1_SCALER_256);
-								g_app_state = show_options;
+                                /* Increment enabled alarms */
+                                INCREMENT(GET_ENABLED_ALARMS_COUNT());
 
+                                /* Enable Alarm */
+                                CURRENT_ALARM_IS_ENABLED = TRUE;
+                                CURRENT_ALARM_IS_RINGING = FALSE;
 
                                 /* Show alarm set message */
                                 LCD_setCursor(LCD_LINE3, LCD_COL0);
@@ -256,7 +277,7 @@ void app_start()
                                 /* Delay show msg to user alarm is set */
                                 delay_ms(APP_DELAY_MS_MSG_TIMEOUT);
 
-                                app_switch_state(show_options);
+                                app_switch_state(APP_STATE_SHOW_OPTIONS);
 							}
 							else
 							{
@@ -277,17 +298,20 @@ void app_start()
 				}
 				break;
 			}
-			case cancel_alarm:
+			case APP_STATE_CANCEL_ALARM:
 			{
-				app_switch_state(cancel_alarm);
+                /* Do Nothing */
 				break;
 			}
-			case show_alarms:
+			case APP_STATE_SHOW_ALARM:
 			{
                 /* Check if cancel is pressed */
-                if(KPD_EXIT == kpd_value)
+                if(KPD_EXIT == uint8_kpd_value)
                 {
-                    app_switch_state(show_options);
+                    /* Clear LCD */
+                    LCD_shiftClear();
+
+                    app_switch_state(APP_STATE_SHOW_OPTIONS);
 
                     /* Break current loop run */
                     break;
@@ -298,51 +322,164 @@ void app_start()
                     LCD_setCursor(LCD_LINE2, LCD_COL7);
 
                     /* Update Timer Counter [UI] */
-                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR(CURRENT_TIME / 600));
+                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR(CURRENT_ALARM_SECONDS / 600));
 
                     /* Write Minutes Tenth Digit */
-                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_TIME / 60) % 10));
+                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_ALARM_SECONDS / 60) % 10));
 
                     /* Write Minutes Unit Digit */
 //                    LCD_setCursor(LCD_LINE2, LCD_COL9);
                     LCD_sendChar(':');
 
                     /* Write Seconds Tenth Digit */
-                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_TIME % 60) /10));
+                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_ALARM_SECONDS % 60) /10));
 
                     /* Write Seconds Unit Digit */
-                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_TIME % 60) % 10));
+                    LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_ALARM_SECONDS % 60) % 10));
                 }
 
 				break;
 			}
-			default:
-			{
-				/* Reset state to initial state */
-				app_switch_state(init);
-				break;
-			}
-		}
+            case APP_STATE_CHOOSE_ALARM:
+            {
+                /* Reset digit index to prepare for input */
+                uint8_alarm_digit_index = APP_ALARM_DIGITS;
+
+                /* Validate keypad input */
+                if((uint8_kpd_value >= '0') && (uint8_kpd_value <= '9'))
+                {
+                    /* set current alarm with keypad input */
+                    SET_CURRENT_ALARM(CONVERT_CHAR_TO_DIGIT(uint8_kpd_value));
+
+                    if(APP_STATE_SET_ALARM == en_gs_next_app_state)
+                    {
+                        app_switch_state(APP_STATE_SET_ALARM);
+                    }
+                    else if(APP_STATE_SHOW_ALARM == en_gs_next_app_state)
+                    {
+                        app_switch_state(APP_STATE_SHOW_ALARM);
+                    }
+                    else if(APP_STATE_CANCEL_ALARM == en_gs_next_app_state)
+                    {
+                        app_switch_state(APP_STATE_CANCEL_ALARM);
+                    }
+                }
+                else
+                {
+                    /* Do Nothing no correct key is pressed */
+                }
+                break;
+            }
+            case APP_STATE_ALARM_RINGING:
+            {
+                /* Wait for user to stop alarm */
+                /* Update is_pressed flag */
+                bool_gs_stop_alarm_pressed = LDR_PRESSED_THRESHOLD > LDR_VALUE;
+
+                if(TRUE == bool_gs_stop_alarm_pressed)
+                {
+                    /* Stop PWM */
+                    pwm_stop();
+
+                    /* Turn off LEDs */
+                    Led_TurnOff(LED_RED_PORT, LED_RED_PIN);
+                    Led_TurnOff(LED_BLUE_PORT, LED_BLUE_PIN);
+                    Led_TurnOff(LED_GREEN_PORT, LED_GREEN_PIN);
+                    Led_TurnOff(LED_YELLOW_PORT, LED_YELLOW_PIN);
+
+                    /* Stop Buzzer */
+                    buzz_stop();
+
+//                    /* stop ringing */
+//                    bool_gs_alarm_ringing = FALSE;
+
+                    /* Turn off and reset alarm */
+                    GET_ALARM_SECONDS(GET_CURRENT_RINGING_ALARM())       = ZERO  ;
+                    GET_ALARM_IS_ENABLED(GET_CURRENT_RINGING_ALARM())    = FALSE ;
+                    GET_ALARM_IS_RINGING(GET_CURRENT_RINGING_ALARM())    = FALSE ;
+
+                    /* Decrement enabled alarms count */
+                    DECREMENT(GET_ENABLED_ALARMS_COUNT());
+
+                    /* Switch to show options UI/state */
+                    app_switch_state(APP_STATE_SHOW_OPTIONS);
+                }
+                else
+                {
+                    /* Keep Ringing Algorithm Running */
+
+                    /* Increment Duty */
+                    if(TRUE == bool_is_dimming_down)
+                    {
+                        uint8_current_pwm_duty -= APP_LED_DIM_STEP;
+                    }
+                    else
+                    {
+                        uint8_current_pwm_duty += APP_LED_DIM_STEP;
+                    }
+
+                    /* Update dim/lit direction if needed */
+                    if(uint8_current_pwm_duty >= APP_LED_MAXIMUM_DUTY)
+                    {
+                        bool_is_dimming_down = TRUE;
+                    }
+                    else if(uint8_current_pwm_duty == ZERO)
+                    {
+                        bool_is_dimming_down = FALSE;
+                    }
+
+                    /* Update PWM Duty */
+                    pwm_set_duty(uint8_current_pwm_duty);
+
+                    INCREMENT(uint16_led_dimmer_counter);
+
+                    if(uint16_led_dimmer_counter > APP_RING_CYCLES_TILL_BUZZ_ON)
+                    {
+                        /* start buzzer */
+                        buzz_on();
+                    }
+
+                    /* Delay PWM */
+                    delay_ms(APP_RING_CYCLES_DURATION_MS);
+                }
+                break;
+            }
+            case APP_STATE_TOTAL:
+            {
+                /* Reset state to initial state */
+                app_switch_state(APP_STATE_INIT);
+                break;
+            }
+            default:
+            {
+                /* Reset state to initial state */
+                app_switch_state(APP_STATE_INIT);
+                break;
+            }
+        }
 	}
 }
 
-static void app_switch_state(app_state state)
+static void app_switch_state(en_app_state_t state)
 {
 	switch (state)
 	{
-		case init:
+		case APP_STATE_INIT:
 		{
 			LCD_clear();
 			LCD_sendString(APP_STR_TITLE);
 
             /* Switch to show options */
-            app_switch_state(show_options);
+            app_switch_state(APP_STATE_SHOW_OPTIONS);
 			break;
 		}
-		case show_options:
+		case APP_STATE_SHOW_OPTIONS:
 		{
             /* Clear LCD */
-//            LCD_clear();
+            LCD_shiftClear();
+
+            /* Show Title */
+            LCD_sendString(APP_STR_TITLE);
 
 			/* LCD show options Menu */
 			LCD_setCursor(LCD_LINE1, LCD_COL0);
@@ -355,10 +492,10 @@ static void app_switch_state(app_state state)
 			LCD_sendString(APP_STR_SHOW_ALARM);
 
             /* Update global app state flag */
-			g_app_state = show_options;
+			en_gs_app_state = APP_STATE_SHOW_OPTIONS;
 			break;
 		}
-		case set_alarm:
+		case APP_STATE_SET_ALARM:
 		{
 			/* Clear LCD */
 			LCD_clear();
@@ -369,16 +506,13 @@ static void app_switch_state(app_state state)
 
             /* Set LCD Cursor Position */
 			LCD_setCursor(LCD_LINE2, LCD_COL7);
-            LCD_sendString("_*:**");
+            LCD_sendString(APP_STR_ALARM_PLACEHOLDER);
             LCD_setCursor(LCD_LINE2, LCD_COL7);
 
-			/* reset index flag */
-			alarm_digit_index = 4;
-
-			g_app_state = set_alarm;
+            en_gs_app_state = APP_STATE_SET_ALARM;
 			break;
 		}
-		case cancel_alarm:
+		case APP_STATE_CANCEL_ALARM:
 		{
             /* Clear LCD */
 			LCD_clear();
@@ -392,14 +526,16 @@ static void app_switch_state(app_state state)
             /* LCD show title */
             LCD_sendString(APP_STR_TITLE);
 
-            /* Reset app timers */
-            app_reset_timer();
+            /* Reset app alarm */
+            CURRENT_ALARM_IS_ENABLED = FALSE;
+            CURRENT_ALARM_IS_RINGING = FALSE;
+            CURRENT_ALARM_SECONDS    = ZERO ;
 
             /* Show options UI */
-            app_switch_state(show_options);
+            app_switch_state(APP_STATE_SHOW_OPTIONS);
 			break;
 		}
-		case show_alarms:
+		case APP_STATE_SHOW_ALARM:
 		{
             /* Clear Screen */
 			LCD_clear();
@@ -407,61 +543,87 @@ static void app_switch_state(app_state state)
             /* Show Title */
             LCD_sendString(APP_STR_TITLE);
 
-            /* Set LCD Cursor Position */
-			LCD_setCursor(LCD_LINE2, LCD_COL7);
-
+            if(FALSE == CURRENT_ALARM_IS_ENABLED)
+            {
+                /* Set LCD Cursor Position */
+                LCD_setCursor(LCD_LINE3, LCD_COL1);
+                /* Show Alarm Disabled Msg */
+                LCD_sendString(APP_STR_ALARM_DISABLED);
+            }
             /* Update global app state flag */
-			g_app_state = show_alarms;
+			en_gs_app_state = APP_STATE_SHOW_ALARM;
 			break;
 		}
-		default:
-		{
-			/* Do Nothing */
-			break;
-		}
-	}
+        case APP_STATE_CHOOSE_ALARM:
+        {
+            /* Clear Screen */
+            LCD_clear();
+
+            /* Show Title */
+            LCD_sendString(APP_STR_TITLE);
+
+            LCD_setCursor(LCD_LINE2, LCD_COL0);
+            LCD_sendString(APP_STR_CHOOSE_ALARM);
+
+            /* update global app state flag */
+            en_gs_app_state = APP_STATE_CHOOSE_ALARM;
+            break;
+        }
+        case APP_STATE_ALARM_RINGING:
+        {
+            /* Clear Screen */
+            LCD_clear();
+
+            /* Show Ringing Message */
+            LCD_sendString(APP_STR_ALARM);
+            LCD_sendChar(CONVERT_DIGIT_TO_CHAR(GET_CURRENT_RINGING_ALARM()));
+
+            LCD_setCursor(LCD_LINE2, LCD_COL6);
+            LCD_sendString(APP_STR_ALARM_RINGING);
+
+            en_gs_app_state = APP_STATE_ALARM_RINGING;
+            break;
+
+        }
+        case APP_STATE_TOTAL:
+        {
+            /* bad state reset */
+            app_switch_state(APP_STATE_SHOW_OPTIONS);
+            break;
+        }
+        default:
+        {
+            /* bad state reset */
+            app_switch_state(APP_STATE_SHOW_OPTIONS);
+            break;
+        }
+    }
 }
 
 static void app_timer_tick_event(void)
 {
 	/* Timer ticked 1 second */
 	uint16_seconds_elapsed++;
-}
 
-static void app_reset_timer()
-{
-	/* Stop Timer */
-	TIMER1_STOP();
+    /* Update alarms times */
+    for (uint8_t_ uint8_alarm_index = 0; uint8_alarm_index < APP_SUPPORTED_ALARMS_COUNT; ++uint8_alarm_index)
+    {
 
-	/* Reset Elapsed Time */
-	uint16_seconds_elapsed = ZERO;
-
-    /* Reset alarm time */
-    uint16_alarm_total_seconds = ZERO;
-}
-
-static void app_led_dimming(void)
-{
-	/* Init variables */
-    uint8_t_ u8_l_counter = MINIMUM_DUTY;
-
-    /* Set PWM duty */
-    pwm_set_duty(u8_l_counter);
-
-    /* Start PWM */
-    pwm_start();
-
-    /* Lit LEDs up */
-	for (u8_l_counter = MINIMUM_DUTY ; u8_l_counter <= MAXIMUM_DUTY ; u8_l_counter = u8_l_counter + 5)
-	{
-        pwm_set_duty(u8_l_counter);
-		delay_ms(50);
-	}
-
-    /* Dim LEDs down */
-	for (u8_l_counter = MAXIMUM_DUTY ; u8_l_counter >= MINIMUM_DUTY ; u8_l_counter = u8_l_counter - 5)
-	{
-        pwm_set_duty(u8_l_counter);
-        delay_ms(50);
-	}
+        /* Check if alarm is enabled and not ringing */
+        if(
+                (TRUE == GET_ALARM_IS_ENABLED(uint8_alarm_index)) &&
+                (FALSE == GET_ALARM_IS_RINGING(uint8_alarm_index))
+                )
+        {
+            if(ZERO != GET_ALARM_SECONDS(uint8_alarm_index))
+            {
+                /* Decrement alarm seconds tick */
+                DECREMENT(GET_ALARM_SECONDS(uint8_alarm_index));
+            }
+            else
+            {
+                /* Do Nothing */
+            }
+        }
+    }
 }
