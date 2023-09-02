@@ -16,11 +16,11 @@
 #include "kpd_interface.h"
 
 /* COMMON */
+#include "std.h"
 #include "Timers.h"
 #include "Timers_Services.h"
 
 /* Macros */
-
 #define APP_ALARM_DIGITS 4
 #define APP_SUPPORTED_ALARMS_COUNT      10
 

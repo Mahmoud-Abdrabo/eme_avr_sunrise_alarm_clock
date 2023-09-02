@@ -27,7 +27,7 @@ static void app_timer_tick_event    (void)                  ;
 
 static uint8_t_                 uint8_gs_current_alarm_index    =   ZERO            ;
 static uint8_t_                 uint8_gs_current_ringing_alarm  =   ZERO            ;
-static uint16_t                 uint16_seconds_elapsed          =   ZERO            ;
+static uint16_t_                uint16_seconds_elapsed          =   ZERO            ;
 
 /* Flags */
 static boolean                  bool_gs_stop_alarm_pressed      =   FALSE           ;
@@ -83,7 +83,7 @@ void app_init()
 void app_start(void)
 {
     /* Local Variables */
-    uint8_t uint8_kpd_value         ,
+    uint8_t_ uint8_kpd_value         ,
             uint8_current_pwm_duty  ,
             uint8_loop_counter      ,
             uint8_alarm_digit_index ;
@@ -502,7 +502,7 @@ static void app_switch_state(en_app_state_t state)
 			LCD_sendString(APP_STR_ALARM_IS_CANCELLED);
 
             /* Delay msg */
-            _delay_ms(APP_DELAY_MS_MSG_TIMEOUT);
+            delay_ms(APP_DELAY_MS_MSG_TIMEOUT);
 
             /* LCD show title */
             LCD_sendString(APP_STR_TITLE);
