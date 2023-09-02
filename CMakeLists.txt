@@ -12,10 +12,9 @@ include_directories(sunrise_alarm_clock/HAL/kpd)
 include_directories(sunrise_alarm_clock/HAL/buzz)
 include_directories(sunrise_alarm_clock/HAL/pwm)
 include_directories(sunrise_alarm_clock/MCAL/adc)
-include_directories(sunrise_alarm_clock/MCAL/timers)
+include_directories(sunrise_alarm_clock/COMMON/timer)
 include_directories(sunrise_alarm_clock/MCAL/gpio)
 include_directories(sunrise_alarm_clock/SERVICE/)
-include_directories("C:/WinAVR-20100110/avr/include/")
 
 add_executable(eme_avr_sunrise_alarm_clock
         sunrise_alarm_clock/APP/app_config.h
@@ -44,11 +43,10 @@ add_executable(eme_avr_sunrise_alarm_clock
         sunrise_alarm_clock/MCAL/gpio/gpio_private.h
         sunrise_alarm_clock/main.c
 
-        "C:/WinAVR-20100110/avr/include/util/delay.h"
         sunrise_alarm_clock/HAL/kpd/kpd_program.c
         sunrise_alarm_clock/HAL/kpd/kpd_interface.h
         sunrise_alarm_clock/HAL/kpd/kpd_config.h
-        sunrise_alarm_clock/MCAL/timers/Timers.c
+        sunrise_alarm_clock/COMMON/timer/Timers.c
         sunrise_alarm_clock/HAL/pwm/pwm_program.c
         sunrise_alarm_clock/HAL/pwm/pwm_interface.h
         sunrise_alarm_clock/HAL/buzz/buzz_interface.h

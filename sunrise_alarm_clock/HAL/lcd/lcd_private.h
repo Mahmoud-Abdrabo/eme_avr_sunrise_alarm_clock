@@ -9,6 +9,19 @@
 #ifndef LCD_PRIVATE_H_
 #define LCD_PRIVATE_H_
 
+/* INCLUDES */
+/* Common */
+#include "bit_math.h"
+#include "Timers.h"
+#include "Timers_Services.h"
+
+/* Code Beatify and Drivers Mapping */
+/* Timers Mapping */
+#define LCD_INIT_DELAY_TIMER()  TIMER2_Init(TIMER2_NORMAL_MODE)
+#define LCD_TIMER_MS_DELAY(ms_delay_val) delay_ms(ms_delay_val)
+#define LCD_TIMER_US_DELAY(us_delay_val) delay_us(us_delay_val)
+/*  */
+
 /* Helper Macro */
 #define CONCAT4(w,x,y,z) CONCAT4_HELPER(w,x,y,z)
 #define CONCAT4_HELPER(w,x,y,z) w##x##y##z

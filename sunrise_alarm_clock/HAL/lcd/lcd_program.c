@@ -5,11 +5,8 @@
  *  Author: Hossam
  */
 
-#include <stdlib.h>
 #include "lcd_interface.h"
 #include "lcd_private.h"
-#include "util/delay.h"
-#include "bit_math.h"
 
 // current cursor position (0 -> 15 @line1, 16 -> 31 @line2)
 static uint8_t_ u8_gs_cursor = 0;
@@ -24,32 +21,35 @@ static uint8_t_ u8_gs_line = LCD_LINE0;
  *
  * @return void
  */
-void LCD_init(void) {
-//    dio_port_init(LCD_DATA_PORT, PORT_OUTPUT, DIO_NO_MASK);
+void LCD_init(void)
+{
+    /* init delay timer */
+    LCD_INIT_DELAY_TIMER();
+
     GPIO_setupPortDirection(LCD_DATA_PORT, PORT_OUTPUT);
     GPIO_writePort(LCD_DATA_PORT, 0x00);
 
     GPIO_setupPinDirection(LCD_CTRL_PORT, LCD_CTRL_PIN_RS, PIN_OUTPUT);
     GPIO_setupPinDirection(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, PIN_OUTPUT);
 
-    _delay_ms(LCD_MS_DELAY_INIT); // 10 ms
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_INIT); // 10 ms
     LCD_sendCommand(LCD_CMD_RETURN_HOME); // Return home
     LCD_sendCommand(LCD_CMD_MODE_4Bit); // 4 bit mode, 2 lines, 5*7 matrix
     LCD_sendCommand(LCD_CMD_DCB); // Display on, Cursor on, Blink on
     LCD_sendCommand(LCD_CMD_INC_CURSOR_RIGHT); // Increment cursor (shift to right)
     LCD_sendCommand(LCD_CMD_CLEAR); // Clear display
-    _delay_ms(LCD_MS_DELAY_STORE);
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);
 
 //	LCD_sendString((uint8_t_ *)"Hello world!\n> Hossam Elwahsh");
 
-//    _delay_ms(LCD_MS_DELAY_STORE);
+//    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);
 
     // pre-storing bell shape at CGRAM location 0
     LCD_storeCustomCharacter(
             (uint8_t_[]) {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00},
         LCD_CUSTOMCHAR_LOC0
         );
-    _delay_ms(LCD_MS_DELAY_STORE);
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);
 
     // display bell top right
 //    LCD_setCursor(LCD_LINE0, LCD_COL15);
@@ -82,10 +82,10 @@ void LCD_sendCommand(uint8_t_ u8_a_cmd) {
 
     // Enable Pulse
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
-    _delay_us(LCD_US_DELAY_PULSE);
+    LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
-	_delay_us(LCD_US_DELAY_HOLD);
+	LCD_TIMER_US_DELAY(LCD_US_DELAY_HOLD);
 
     // send lower nibble
 
@@ -99,10 +99,10 @@ void LCD_sendCommand(uint8_t_ u8_a_cmd) {
 
     // Enable Pulse
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
-    _delay_us(LCD_US_DELAY_PULSE);
+    LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
-    _delay_ms(LCD_MS_DELAY_STORE); // 2ms
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE); // 2ms
 }
 
 /**
@@ -141,10 +141,10 @@ void LCD_sendChar(uint8_t_ u8_a_data)
 
     // Enable Pulse
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
-    _delay_us(LCD_US_DELAY_PULSE);
+    LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
-    _delay_us(LCD_US_DELAY_HOLD);
+    LCD_TIMER_US_DELAY(LCD_US_DELAY_HOLD);
 
     // send lower nibble
 
@@ -155,12 +155,12 @@ void LCD_sendChar(uint8_t_ u8_a_data)
 
     // Enable Pulse
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
-    _delay_us(LCD_US_DELAY_PULSE);
+    LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
-    _delay_ms(LCD_MS_DELAY_STORE); // 2ms
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE); // 2ms
 
-	_delay_ms(LCD_MS_DELAY_CHAR);
+	LCD_TIMER_MS_DELAY(LCD_MS_DELAY_CHAR);
 }
 
 /**
@@ -267,26 +267,18 @@ void LCD_shiftClear(void)
     for (int i = 0; i < LCD_LINE_COLS; ++i)
     {
         LCD_sendCommand(LCD_CMD_DISP_SHIFT_RIGHT);
-        _delay_ms(LCD_MS_DELAY_SHIFT);
+        LCD_TIMER_MS_DELAY(LCD_MS_DELAY_SHIFT);
     }
     LCD_sendCommand(LCD_CMD_CLEAR);
     u8_gs_cursor = ZERO;
 }
 
-void LCD_printNumber(uint16_t_ uint16_a_number, uint8_t_ lcd_line, uint8_t_ lcd_col)
-{
-    char str_buff[10] = {0};
-
-    /* Convert number to string */
-    itoa(uint16_a_number, str_buff, 10);
-
-    /* Set LCD Cursor Location */
-    LCD_setCursor(lcd_line, lcd_col);
-
-    /* print Number */
-    LCD_sendString((uint8_t_ *)str_buff);
-}
-
+/**
+ * @brief   :   Prints a number starting from unit digit first and going backward in LCD position
+ * @param[in] uint16_a_number   : Number to print
+ * @param[in] lcd_line          : LCD line to print at
+ * @param[in] lcd_col           : LCD column to start at (going backwards)
+ */
 void LCD_printNumberFromEnd(uint16_t_ uint16_a_number, uint8_t_ lcd_line, uint8_t_ lcd_col)
 {
     int digit;
