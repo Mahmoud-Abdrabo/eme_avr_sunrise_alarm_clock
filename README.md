@@ -47,5 +47,5 @@ When an alarm time is reached, the Sunrise Alarm provides a gentle and effective
 
 ### Layered Architecture
 
-![Layered_Arch]()
+![Layered_Arch](Docs/Layered_architecture.drawio.png)
 
