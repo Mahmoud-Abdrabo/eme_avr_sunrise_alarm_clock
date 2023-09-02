@@ -13,7 +13,7 @@ void buzz_on(void)
 	 GPIO_writePin(BUZZ_PORT,  BUZZ_PIN, PIN_OUTPUT);
 }
 
-void buzz_stop(void)
+void buzz_off(void)
 {
 	GPIO_writePin(BUZZ_PORT,  BUZZ_PIN, LOGIC_LOW);
 }

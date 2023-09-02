@@ -29,7 +29,6 @@ typedef enum
 	APP_STATE_SET_ALARM             ,
 	APP_STATE_CANCEL_ALARM          ,
 	APP_STATE_SHOW_ALARM            ,
-//    APP_STATE_INIT_RINGING          ,
     APP_STATE_ALARM_RINGING         ,
     APP_STATE_TOTAL
 }en_app_state_t;
@@ -216,81 +215,74 @@ void app_start()
 				/* Check for key press */
 				if(NULL != uint8_kpd_value)
 				{
-					switch (uint8_kpd_value)
-					{
-						case '0':
-						case '1':
-						case '2':
-						case '3':
-						case '4':
-						case '5':
-						case '6':
-						case '7':
-						case '8':
-						case '9':
-						{
-							/* Parse Numbers */
-							if(4 == uint8_alarm_digit_index)
-							{
-                                /* Show pressed key on LCD */
-                                LCD_sendChar(uint8_kpd_value);
-                                CURRENT_ALARM_SECONDS = CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 10 * 60;
+                    if((uint8_kpd_value >= '0') && (uint8_kpd_value <= '9'))
+                    {
+                        /* Parse Numbers */
+                        if(4 == uint8_alarm_digit_index)
+                        {
+                            /* Show pressed key on LCD */
+                            LCD_sendChar(uint8_kpd_value);
+                            CURRENT_ALARM_SECONDS = CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 10 * 60;
 
-							}
-							else if(3 == uint8_alarm_digit_index)
-							{
-								/* Show pressed key on LCD */
-								LCD_sendChar(uint8_kpd_value);
-								LCD_sendChar(':');
-                                CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 60;
-							}
-							else if(2 == uint8_alarm_digit_index)
-							{
-                                /* Show pressed key on LCD */
-								LCD_sendChar(uint8_kpd_value);
-                                CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 10;
+                            /* Decrement Digit index */
+                            DECREMENT(uint8_alarm_digit_index);
+                        }
+                        else if(3 == uint8_alarm_digit_index)
+                        {
+                            /* Show pressed key on LCD */
+                            LCD_sendChar(uint8_kpd_value);
+                            LCD_sendChar(':');
+                            CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 60;
 
-							}
-							else if(1 == uint8_alarm_digit_index)
-							{
-                                /* Show pressed key on LCD */
-								LCD_sendChar(uint8_kpd_value);
-                                CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value);
-							}
+                            /* Decrement Digit index */
+                            DECREMENT(uint8_alarm_digit_index);
+                        }
+                        else if((2 == uint8_alarm_digit_index) && (uint8_kpd_value <= '5'))
+                        {
+                            /* Show pressed key on LCD */
+                            LCD_sendChar(uint8_kpd_value);
+                            CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value) * 10;
 
+                            /* Decrement Digit index */
+                            DECREMENT(uint8_alarm_digit_index);
+                        }
+                        else if(1 == uint8_alarm_digit_index)
+                        {
+                            /* Show pressed key on LCD */
+                            LCD_sendChar(uint8_kpd_value);
+                            CURRENT_ALARM_SECONDS += CONVERT_CHAR_TO_DIGIT(uint8_kpd_value);
 
-							DECREMENT(uint8_alarm_digit_index);
+                            /* Decrement Digit index */
+                            DECREMENT(uint8_alarm_digit_index);
+                        }
 
-							if(0 == uint8_alarm_digit_index)
-							{
-                                /* Increment enabled alarms */
-                                INCREMENT(GET_ENABLED_ALARMS_COUNT());
+                        if(0 == uint8_alarm_digit_index)
+                        {
+                            /* Increment enabled alarms */
+                            INCREMENT(GET_ENABLED_ALARMS_COUNT());
 
-                                /* Enable Alarm */
-                                CURRENT_ALARM_IS_ENABLED = TRUE;
-                                CURRENT_ALARM_IS_RINGING = FALSE;
+                            /* Enable Alarm */
+                            CURRENT_ALARM_IS_ENABLED = TRUE;
+                            CURRENT_ALARM_IS_RINGING = FALSE;
 
-                                /* Show alarm set message */
-                                LCD_setCursor(LCD_LINE3, LCD_COL0);
-                                LCD_sendString(APP_STR_ALARM_SET);
+                            /* Show alarm set message */
+                            LCD_setCursor(LCD_LINE3, LCD_COL0);
+                            LCD_sendString(APP_STR_ALARM_SET);
 
-                                /* Delay show msg to user alarm is set */
-                                delay_ms(APP_DELAY_MS_MSG_TIMEOUT);
+                            /* Delay show msg to user alarm is set */
+                            delay_ms(APP_DELAY_MS_MSG_TIMEOUT);
 
-                                app_switch_state(APP_STATE_SHOW_OPTIONS);
-							}
-							else
-							{
-								/* Do Nothing */
-							}
-							break;
-						}
-						default:
-						{
-							/* Skip */
-							break;
-						}
-					}
+                            app_switch_state(APP_STATE_SHOW_OPTIONS);
+                        }
+                        else
+                        {
+                            /* Do Nothing */
+                        }
+                    }
+                    else
+                    {
+                        /* Do Nothing */
+                    }
 				}
 				else
 				{
@@ -388,7 +380,7 @@ void app_start()
                     Led_TurnOff(LED_YELLOW_PORT, LED_YELLOW_PIN);
 
                     /* Stop Buzzer */
-                    buzz_stop();
+                    buzz_off();
 
 //                    /* stop ringing */
 //                    bool_gs_alarm_ringing = FALSE;

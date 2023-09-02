@@ -57,5 +57,6 @@ add_executable(eme_avr_sunrise_alarm_clock
         sunrise_alarm_clock/APP/app_private.h
         sunrise_alarm_clock/SERVICE/Timers_Services.h
         sunrise_alarm_clock/SERVICE/Timers_Services.c
+        sunrise_alarm_clock/HAL/buzz/buzz_program.c
 
 )
