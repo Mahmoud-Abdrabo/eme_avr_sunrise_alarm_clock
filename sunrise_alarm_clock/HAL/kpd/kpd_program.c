@@ -7,8 +7,13 @@
 
 #include "kpd_config.h"
 #include "kpd_interface.h"
+#include "Timers.h"
+#include "Timers_Services.h"
+
 #define  F_CPU    16000000UL
-#include "util/delay.h"
+
+#define KPD_INIT_DELAY_TIMER()  TIMER2_Init(TIMER2_NORMAL_MODE)
+#define KPD_TIMER_MS_DELAY(ms_delay_val) delay_ms(ms_delay_val)
 
 const uint8_t_ keypad_values[4][4] = {
         {'1','2','3','A'},
@@ -34,6 +39,9 @@ const uint8_t_ keypad_rows[KEYPAD_ROWS_TOTAL] = {
 
 void keypad_init(void)
 {
+    /* Init keypad */
+    KPD_INIT_DELAY_TIMER();
+
     /* init rows */
     for (int i = 0; i < KEYPAD_ROWS_TOTAL; ++i) {
         /* init pin as input */
@@ -72,7 +80,7 @@ uint8_t_ keypad_read(void)
             if (u8_l_dio_pin_val == LOGIC_LOW)
             {
                 /* debounce */
-                _delay_ms(KEYPAD_DEBOUNCE_DELAY_MS);
+                KPD_TIMER_MS_DELAY(KEYPAD_DEBOUNCE_DELAY_MS);
 
                 u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[col]);
 
