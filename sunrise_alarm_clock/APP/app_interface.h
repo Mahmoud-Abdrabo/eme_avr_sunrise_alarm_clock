@@ -12,10 +12,7 @@
 #include "app_config.h"
 #include "std.h"
 
-#define CONVERT_CHAR_TO_DIGIT(char_val) (char_val - '0')
-#define CONVERT_DIGIT_TO_CHAR(digit_val) (digit_val + '0')
-
-void app_init();
-void app_start();
+void app_init   (void);
+void app_start  (void);
 
 #endif /* APP_INTERFACE_H_ */

@@ -6,6 +6,16 @@
 #define EME_AVR_SUNRISE_ALARM_CLOCK_APP_PRIVATE_H
 
 /* Includes */
+
+/* HAL */
+#include "Led.h"
+#include "pwm_interface.h"
+#include "lcd_interface.h"
+#include "ldr_interface.h"
+#include "buzz_interface.h"
+#include "kpd_interface.h"
+
+/* COMMON */
 #include "Timers.h"
 #include "Timers_Services.h"
 
@@ -17,6 +27,7 @@
 /* Code Beautify Macros */
 #define APP_INIT_SYS_TICK_TIMER()   Timer1_Init     (TIMER1_NORMAL_MODE); \
                                     Timer1_OVF_InterruptEnable()
+#define APP_SET_SYS_TICK_TIMER_CALLBACK(callback_fun_ptr) Timer1_OVF_SetCallBack(callback_fun_ptr)
 #define APP_INIT_DELAY_TIMER()      TIMER2_Init     (TIMER2_NORMAL_MODE)
 #define APP_START_SYS_TICK_TIMER()  Timer1_change   (TIMER1_SCALER_256)
 
@@ -33,6 +44,9 @@
 #define SET_CURRENT_RINGING_ALARM(val)  uint8_gs_current_ringing_alarm = val
 
 #define GET_ENABLED_ALARMS_COUNT()        st_gs_app_alarms_config.uint8_enabled_alarms
+
+#define CONVERT_CHAR_TO_DIGIT(char_val) (char_val - '0')
+#define CONVERT_DIGIT_TO_CHAR(digit_val) (digit_val + '0')
 
 /* Typedefs */
 

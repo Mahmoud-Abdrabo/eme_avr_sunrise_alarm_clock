@@ -10,17 +10,6 @@
 #include "app_config.h"
 #include "app_private.h"
 
-/* HAL */
-#include "Led.h"
-#include "pwm_interface.h"
-#include "lcd_interface.h"
-#include "ldr_interface.h"
-#include "buzz_interface.h"
-#include "kpd_interface.h"
-
-/* COMMON */
-#include "Timers.h"
-
 typedef enum
 {
 	APP_STATE_INIT          =   0   ,
@@ -42,7 +31,7 @@ static uint16_t                 uint16_seconds_elapsed          =   ZERO        
 
 /* Flags */
 static boolean                  bool_gs_stop_alarm_pressed      =   FALSE           ;
-//static boolean                  bool_gs_alarm_ringing           =   FALSE           ;
+
 /* App state */
 static en_app_state_t           en_gs_app_state                 =   APP_STATE_INIT  ;
 static en_app_state_t           en_gs_next_app_state            =   APP_STATE_INIT  ;
@@ -50,6 +39,9 @@ static en_app_state_t           en_gs_next_app_state            =   APP_STATE_IN
 /* App Alarms */
 static st_app_alarms_config_t   st_gs_app_alarms_config                             ;
 
+/**
+ * @brief   : Initializes Application
+ */
 void app_init()
 {
 
@@ -78,16 +70,17 @@ void app_init()
     APP_INIT_SYS_TICK_TIMER();
     APP_INIT_DELAY_TIMER();
 
+    /* Set callbacks */
+    APP_SET_SYS_TICK_TIMER_CALLBACK(app_timer_tick_event);
+
 	/* Enable Interrupt */
 	sei();
-
-	/* Set Timer Callback */
-	Timer1_OVF_SetCallBack(app_timer_tick_event);
-
 }
 
-
-void app_start()
+/**
+ * @brief   :   Start Application Logic / Superloop
+ */
+void app_start(void)
 {
     /* Local Variables */
     uint8_t uint8_kpd_value         ,
@@ -131,9 +124,6 @@ void app_start()
                      /* Set alarm to ringing */
                     GET_ALARM_IS_RINGING(uint8_loop_counter) = TRUE;
 
-//                     /* Set global state to ringing */
-//                    bool_gs_alarm_ringing = TRUE;
-
                      /* Reset led dimming flags */
                     uint16_led_dimmer_counter   = ZERO                  ;
                     uint8_current_pwm_duty      = APP_LED_MINIMUM_DUTY  ;
@@ -152,8 +142,7 @@ void app_start()
                 }
                 else
                 {
-                     /* Decrement alarm counter */
-                    /*DECREMENT(GET_ALARM_SECONDS(uint8_loop_counter));*/
+                     /* Do Nothing */
                 }
             } /* end if */
             else
