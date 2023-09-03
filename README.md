@@ -43,7 +43,7 @@ When an alarm time is reached, the Sunrise Alarm provides a gentle and effective
 - The buzzer can be silenced by covering the light sensor (LDR), encouraging the user to get out of bed and start their day.
 - If a subsequent alarm is set to activate shortly after the first one, the system automatically switches from one alarm to the next, ensuring a seamless wake-up experience.
 
-### Video showcase 👉 [video]
+### Video showcase 👉 [video](Docs/WhatsApp%20Video%202023-09-03%20at%2009.24.20.mp4)
 
 ### Layered Architecture
 
