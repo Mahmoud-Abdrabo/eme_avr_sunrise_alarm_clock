@@ -8,7 +8,6 @@
 #include "lcd_interface.h"
 #include "lcd_private.h"
 
-// current cursor position (0 -> 15 @line1, 16 -> 31 @line2)
 static uint8_t_ u8_gs_cursor = 0;
 static uint8_t_ u8_gs_line = LCD_LINE0;
 
@@ -32,28 +31,20 @@ void LCD_init(void)
     GPIO_setupPinDirection(LCD_CTRL_PORT, LCD_CTRL_PIN_RS, PIN_OUTPUT);
     GPIO_setupPinDirection(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, PIN_OUTPUT);
 
-    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_INIT); // 10 ms
-    LCD_sendCommand(LCD_CMD_RETURN_HOME); // Return home
-    LCD_sendCommand(LCD_CMD_MODE_4Bit); // 4 bit mode, 2 lines, 5*7 matrix
-    LCD_sendCommand(LCD_CMD_DCB); // Display on, Cursor on, Blink on
-    LCD_sendCommand(LCD_CMD_INC_CURSOR_RIGHT); // Increment cursor (shift to right)
-    LCD_sendCommand(LCD_CMD_CLEAR); // Clear display
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_INIT);/*  10 ms */
+    LCD_sendCommand(LCD_CMD_RETURN_HOME);/*  Return home */
+    LCD_sendCommand(LCD_CMD_MODE_4Bit);/*  4 bit mode, 2 lines, 5*7 matrix */
+    LCD_sendCommand(LCD_CMD_DCB);/*  Display on, Cursor on, Blink on */
+    LCD_sendCommand(LCD_CMD_INC_CURSOR_RIGHT);/*  Increment cursor (shift to right) */
+    LCD_sendCommand(LCD_CMD_CLEAR);/*  Clear display */
     LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);
 
-//	LCD_sendString((uint8_t_ *)"Hello world!\n> Hossam Elwahsh");
-
-//    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);
-
-    // pre-storing bell shape at CGRAM location 0
+    /* pre-storing bell shape at CGRAM location 0 */
     LCD_storeCustomCharacter(
             (uint8_t_[]) {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00},
         LCD_CUSTOMCHAR_LOC0
         );
     LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);
-
-    // display bell top right
-//    LCD_setCursor(LCD_LINE0, LCD_COL15);
-//    LCD_sendChar(LCD_CUSTOMCHAR_LOC0);
 }
 
 /**
@@ -68,50 +59,35 @@ void LCD_init(void)
  */
 void LCD_sendCommand(uint8_t_ u8_a_cmd) {
 
-    // RS select command register
+    /* RS select command register */
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_RS,  LOGIC_LOW);
 
-	// send upper nibble
+	/* send upper nibble */
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D7, GET_BIT(u8_a_cmd, 7));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D6, GET_BIT(u8_a_cmd, 6));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D5, GET_BIT(u8_a_cmd, 5));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D4, GET_BIT(u8_a_cmd, 4));
 
-
-//	dio_port_write(LCD_DATA_PORT, HIGHER_NIBBLE_SHIFT(u8_a_cmd), LCD_DATA_PINS_MASK);
-
-    // Enable Pulse
+    /* Enable Pulse */
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
     LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
 	LCD_TIMER_US_DELAY(LCD_US_DELAY_HOLD);
 
-    // send lower nibble
-
+    /* Send lower nibble */
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D7, GET_BIT(u8_a_cmd, 3));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D6, GET_BIT(u8_a_cmd, 2));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D5, GET_BIT(u8_a_cmd, 1));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D4, GET_BIT(u8_a_cmd, 0));
 
-
-//    DIO_portWrite(LCD_DATA_PORT, LOWER_NIBBLE_SHIFT(u8_a_cmd), LCD_DATA_PINS_MASK);
-
-    // Enable Pulse
+    /* Enable Pulse */
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
     LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
-    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE); // 2ms
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE); /* 2ms */
 }
-
-/**
-
-
-
-    @param u8_a_data The character to be sent to the LCD display
-    @return void
-    */
 
 /**
  * @brief Sends a single character to the LCD display
@@ -126,39 +102,36 @@ void LCD_sendCommand(uint8_t_ u8_a_cmd) {
 void LCD_sendChar(uint8_t_ u8_a_data)
 {
 	
-	// Select Data Register
+	/* Select Data Register */
 	GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_RS, LOGIC_HIGH);
 
 
-    // send upper nibble
+    /* send upper nibble */
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D7, GET_BIT(u8_a_data, 7));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D6, GET_BIT(u8_a_data, 6));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D5, GET_BIT(u8_a_data, 5));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D4, GET_BIT(u8_a_data, 4));
 
-    /* old */
-//    DIO_portWrite(LCD_DATA_PORT, HIGHER_NIBBLE_SHIFT(u8_a_data), LCD_DATA_PINS_MASK);
-
-    // Enable Pulse
+    /* Enable Pulse */
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
     LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
     LCD_TIMER_US_DELAY(LCD_US_DELAY_HOLD);
 
-    // send lower nibble
+    /* send lower nibble */
 
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D7, GET_BIT(u8_a_data, 3));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D6, GET_BIT(u8_a_data, 2));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D5, GET_BIT(u8_a_data, 1));
     GPIO_writePin(LCD_DATA_PORT, LCD_DATA_PIN_D4, GET_BIT(u8_a_data, 0));
 
-    // Enable Pulse
+    /* Enable Pulse */
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN,  LOGIC_HIGH);
     LCD_TIMER_US_DELAY(LCD_US_DELAY_PULSE);
     GPIO_writePin(LCD_CTRL_PORT, LCD_CTRL_PIN_EN, LOGIC_LOW);
 
-    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE); // 2ms
+    LCD_TIMER_MS_DELAY(LCD_MS_DELAY_STORE);/*  2ms */
 
 	LCD_TIMER_MS_DELAY(LCD_MS_DELAY_CHAR);
 }
@@ -215,17 +188,16 @@ uint8_t_ LCD_setCursor(uint8_t_ u8_a_line, uint8_t_ u8_a_col)
 {
     if(u8_a_line > LCD_LINE3 || u8_a_col > LCD_COL19) return STD_NOK;
 
-    unsigned short firstCharAddr[] = {LCD_LINE0_ADDR, LCD_LINE1_ADDR, LCD_LINE2_ADDR, LCD_LINE3_ADDR}; // Address of the first character of each line
+    unsigned short firstCharAddr[] = {LCD_LINE0_ADDR, LCD_LINE1_ADDR, LCD_LINE2_ADDR, LCD_LINE3_ADDR};/*  Address of the first character of each line */
     LCD_sendCommand(LCD_LINES_BASE_RAM_LOC + firstCharAddr[u8_a_line] + u8_a_col);
-	// update global cursor
+	/* update global cursor */
 	u8_gs_cursor = (u8_a_line * LCD_LINE_COLS) + u8_a_col;
-    // update global line
+    /* update global line */
     u8_gs_line = u8_a_line;
 
     return STD_OK;
 }
 
-// locations: LCD_CUSTOMCHAR_LOC0 -> LOC7
 
 /**
  * @brief Stores a custom character bitmap pattern in the CGRAM of the LCD module
@@ -237,14 +209,18 @@ uint8_t_ LCD_setCursor(uint8_t_ u8_a_line, uint8_t_ u8_a_col)
  */
 uint8_t_ LCD_storeCustomCharacter(uint8_t_ * u8_a_pattern, uint8_t_ u8_a_location) {
 
+    /* Init local variables */
+    uint8_t_ uint8_l_loop_counter;
+
     if(u8_a_location > LCD_CGRAM_LOC_COUNT) return STD_NOK;
 
-    // set CGRAM Address
+    /* set CGRAM Address */
     LCD_sendCommand(LCD_CGRAM_ADDR + (u8_a_location * LCD_CGRAM_LOC_SIZE));
 
-    // store custom character bitmap bytes
-    for (int i = 0; i < LCD_CGRAM_LOC_SIZE; ++i) {
-        LCD_sendChar(u8_a_pattern[i]);
+    /* store custom character bitmap bytes */
+    for (uint8_l_loop_counter = 0; uint8_l_loop_counter < LCD_CGRAM_LOC_SIZE; ++uint8_l_loop_counter)
+    {
+        LCD_sendChar(u8_a_pattern[uint8_l_loop_counter]);
     }
 
     return STD_OK;
@@ -264,7 +240,10 @@ void LCD_clear(void)
  */
 void LCD_shiftClear(void)
 {
-    for (int i = 0; i < LCD_LINE_COLS; ++i)
+    /* Declare local variables */
+    uint8_t_ uint8_l_lcd_lines_loop_counter;
+
+    for (uint8_l_lcd_lines_loop_counter = 0; uint8_l_lcd_lines_loop_counter < LCD_LINE_COLS; ++uint8_l_lcd_lines_loop_counter)
     {
         LCD_sendCommand(LCD_CMD_DISP_SHIFT_RIGHT);
         LCD_TIMER_MS_DELAY(LCD_MS_DELAY_SHIFT);
@@ -289,7 +268,7 @@ void LCD_printNumberFromEnd(uint16_t_ uint16_a_number, uint8_t_ lcd_line, uint8_
         LCD_setCursor(lcd_line, lcd_col);
 
         digit = uint16_a_number % 10;
-        LCD_sendChar(digit + '0'); // print ASCII digit
+        LCD_sendChar(digit + '0');/*  print ASCII digit */
         lcd_col--;
     } while (uint16_a_number /= 10);
 

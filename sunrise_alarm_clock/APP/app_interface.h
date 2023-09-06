@@ -10,7 +10,6 @@
 #define APP_INTERFACE_H_
 
 #include "app_config.h"
-#include "std.h"
 
 void app_init   (void);
 void app_start  (void);

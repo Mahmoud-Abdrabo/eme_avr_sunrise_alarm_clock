@@ -6,6 +6,7 @@
  */ 
 #include "pwm_interface.h"
 #include "pwm_linking_config.h"
+#include "interrupts.h"
 
 void pwm_init(void)
 {
@@ -14,7 +15,7 @@ void pwm_init(void)
 	uint8_t_ loop_on_elments;
 
     /* Init timer in fast pwm mode */
-    TIMER0_Init(TIMER0_FASTPWM_MODE);
+    timer0_init(TIMER0_FASTPWM_MODE);
 
 	for (loop_on_array = 0; loop_on_array < PWM_PINS_COUNT; ++loop_on_array)
     {
@@ -29,13 +30,13 @@ void pwm_init(void)
 void pwm_start()
 {
     sei();
-    TIMER0_OV_InterruptEnable();
-    TIMER0_OC_InterruptEnable();
-    Timer0_change(TIMER0_SCALER_8);
+    timer0_ov_interrupt_enable();
+    timer0_oc_interrupt_enable();
+    timer0_change(TIMER0_SCALER_8);
 }
 
 void pwm_stop(){
-    Timer0_change(TIMER0_STOP);
+    timer0_change(TIMER0_STOP);
 }
 
 

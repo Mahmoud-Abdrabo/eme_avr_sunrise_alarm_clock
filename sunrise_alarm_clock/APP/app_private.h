@@ -1,6 +1,6 @@
-//
-// Created by Hossam Elwahsh on 8/31/2023.
-//
+/*
+ * Created by Hossam Elwahsh on 8/31/2023.
+*/
 
 #ifndef EME_AVR_SUNRISE_ALARM_CLOCK_APP_PRIVATE_H
 #define EME_AVR_SUNRISE_ALARM_CLOCK_APP_PRIVATE_H
@@ -17,19 +17,20 @@
 
 /* COMMON */
 #include "std.h"
-#include "Timers.h"
+#include "interrupts.h"
+#include "timer_interface.h"
 #include "Timers_Services.h"
 
 /* Macros */
-#define APP_ALARM_DIGITS 4
-#define APP_SUPPORTED_ALARMS_COUNT      10
+#define APP_ALARM_DIGITS                (4)
+#define APP_SUPPORTED_ALARMS_COUNT      (10)
 
 /* Code Beautify Macros */
-#define APP_INIT_SYS_TICK_TIMER()   Timer1_Init     (TIMER1_NORMAL_MODE); \
-                                    Timer1_OVF_InterruptEnable()
-#define APP_SET_SYS_TICK_TIMER_CALLBACK(callback_fun_ptr) Timer1_OVF_SetCallBack(callback_fun_ptr)
-#define APP_INIT_DELAY_TIMER()      TIMER2_Init     (TIMER2_NORMAL_MODE)
-#define APP_START_SYS_TICK_TIMER()  Timer1_change   (TIMER1_SCALER_256)
+#define APP_INIT_SYS_TICK_TIMER()   timer1_init     (TIMER1_NORMAL_MODE); \
+                                    timer1_ovf_interrupt_enable()
+#define APP_SET_SYS_TICK_TIMER_CALLBACK(callback_fun_ptr) timer1_ovf_set_callback(callback_fun_ptr)
+#define APP_INIT_DELAY_TIMER()      timer2_init     (TIMER2_NORMAL_MODE)
+#define APP_START_SYS_TICK_TIMER()  timer1_change   (TIMER1_SCALER_256)
 
 #define CURRENT_ALARM_SECONDS       st_gs_app_alarms_config.st_arr_app_alarms[uint8_gs_current_alarm_index].uint16_alarm_seconds
 #define CURRENT_ALARM_IS_RINGING    st_gs_app_alarms_config.st_arr_app_alarms[uint8_gs_current_alarm_index].bool_alarm_ringing
@@ -63,4 +64,4 @@ typedef struct
     uint8_t_ uint8_enabled_alarms;
 }st_app_alarms_config_t;
 
-#endif //EME_AVR_SUNRISE_ALARM_CLOCK_APP_PRIVATE_H
+#endif/* EME_AVR_SUNRISE_ALARM_CLOCK_APP_PRIVATE_H */

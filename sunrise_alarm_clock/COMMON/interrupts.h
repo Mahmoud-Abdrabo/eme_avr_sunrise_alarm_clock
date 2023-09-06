@@ -45,8 +45,8 @@ void INT_VECT(void)
 /*************************************************************************************************************
  * 									Global interrupt control macros 
  ************************************************************************************************************/
-#define sei() __asm__ __volatile__ ("sei" ::: "memory")			/* Sets Global Interrupt Enable Bit   */
-#define cli() __asm__ __volatile__ ("cli" ::: "memory")			/* Clears Global Interrupt Enable Bit */
+#define sei() SET_BIT(AVR_SREG_REG, AVR_SREG_GLOBAL_INTERRUPT_ENABLE_BIT)			/* Sets Global Interrupt Enable Bit   */
+#define cli() CLR_BIT(AVR_SREG_REG, AVR_SREG_GLOBAL_INTERRUPT_ENABLE_BIT)			/* Clears Global Interrupt Enable Bit */
 
 
 #endif /* INTERRUPTS_H_ */

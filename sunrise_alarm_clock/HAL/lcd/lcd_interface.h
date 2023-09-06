@@ -13,51 +13,53 @@
 #include "std.h"
 #include "lcd_config.h"
 
-#define F_CPU   16000000UL
+#ifndef F_CPU
+#define F_CPU   (16000000UL)
+#endif
 
 /* Macros */
 
-// LCD Lines
-#define LCD_LINE0           0
-#define LCD_LINE1           1
-#define LCD_LINE2           2
-#define LCD_LINE3           3
-#define LCD_LINES_TOTAL     4
+/* LCD Lines */
+#define LCD_LINE0           (0)
+#define LCD_LINE1           (1)
+#define LCD_LINE2           (2)
+#define LCD_LINE3           (3)
+#define LCD_LINES_TOTAL     (4)
 
-// LCD Columns
-#define LCD_COL0	0
-#define LCD_COL1	1
-#define LCD_COL2	2
-#define LCD_COL3	3
-#define LCD_COL4	4
-#define LCD_COL5	5
-#define LCD_COL6	6
-#define LCD_COL7	7
-#define LCD_COL8	8
-#define LCD_COL9	9
-#define LCD_COL10	10
-#define LCD_COL11	11
-#define LCD_COL12	12
-#define LCD_COL13	13
-#define LCD_COL14	14
-#define LCD_COL15	15
-#define LCD_COL16	16
-#define LCD_COL17	17
-#define LCD_COL18	18
-#define LCD_COL19	19
+/* LCD Columns */
+#define LCD_COL0	(0)
+#define LCD_COL1	(1)
+#define LCD_COL2	(2)
+#define LCD_COL3	(3)
+#define LCD_COL4	(4)
+#define LCD_COL5	(5)
+#define LCD_COL6	(6)
+#define LCD_COL7	(7)
+#define LCD_COL8	(8)
+#define LCD_COL9	(9)
+#define LCD_COL10	(10)
+#define LCD_COL11	(11)
+#define LCD_COL12	(12)
+#define LCD_COL13	(13)
+#define LCD_COL14	(14)
+#define LCD_COL15	(15)
+#define LCD_COL16	(16)
+#define LCD_COL17	(17)
+#define LCD_COL18	(18)
+#define LCD_COL19	(19)
 
-// LCD Custom Chars Locations
-#define LCD_CUSTOMCHAR_LOC0	0
-#define LCD_CUSTOMCHAR_LOC1	1
-#define LCD_CUSTOMCHAR_LOC2	2
-#define LCD_CUSTOMCHAR_LOC3	3
-#define LCD_CUSTOMCHAR_LOC4	4
-#define LCD_CUSTOMCHAR_LOC5	5
-#define LCD_CUSTOMCHAR_LOC6	6
-#define LCD_CUSTOMCHAR_LOC7	7
+/* LCD Custom Chars Locations */
+#define LCD_CUSTOMCHAR_LOC0	(0)
+#define LCD_CUSTOMCHAR_LOC1	(1)
+#define LCD_CUSTOMCHAR_LOC2	(2)
+#define LCD_CUSTOMCHAR_LOC3	(3)
+#define LCD_CUSTOMCHAR_LOC4	(4)
+#define LCD_CUSTOMCHAR_LOC5	(5)
+#define LCD_CUSTOMCHAR_LOC6	(6)
+#define LCD_CUSTOMCHAR_LOC7	(7)
 
 /* Custom Chars */
-#define LCD_CUSTOM_SOLID_BLOCK 0xFF
+#define LCD_CUSTOM_SOLID_BLOCK (0xFF)
 
 /* Prototypes */
 

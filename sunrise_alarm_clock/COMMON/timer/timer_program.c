@@ -1,21 +1,21 @@
-#include "gpio.h"
-#include "Timers.h"
+#include "gpio_interface.h"
+#include "timer_interface.h"
 
 /*************************Pointer to functions to be assigned to ISR*********************************/
 
-static void (*Timer1_OVF_Fptr) (void)=NULL_PTR;
-static void (*Timer1_OCA_Fptr) (void)=NULL_PTR;
-static void (*Timer1_OCB_Fptr) (void)=NULL_PTR;
-static void (*Timer1_ICU_Fptr) (void)=NULL_PTR;
+static void (*timer1_ovf_fptr) (void)=NULL_PTR;
+static void (*timer1_oca_fptr) (void)=NULL_PTR;
+static void (*timer1_ocb_fptr) (void)=NULL_PTR;
+static void (*timer1_icu_fptr) (void)=NULL_PTR;
 /******************************************************************************************/
 
 
 /*timer 0 functions*/
 
 
-void TIMER0_Init(Timer0Mode_type mode)
+void timer0_init(en_timer0_mode_t en_timer0_mode_a_mode)
 {
-	switch (mode)
+	switch (en_timer0_mode_a_mode)
 	{
 		case TIMER0_NORMAL_MODE:
 		CLR_BIT(TCCR0,WGM00);
@@ -36,15 +36,15 @@ void TIMER0_Init(Timer0Mode_type mode)
 	}
 	
 }
-void Timer0_change(Timer0Scaler_type scaler)
+void timer0_change(en_timer0_scaler_t en_timer0_scaler_a_scaler)
 {
-	TCCR0&=0XF8;//0b11111000
-	TCCR0|=scaler;
+	TCCR0&=0XF8; /* 0b11111000 */
+	TCCR0|=en_timer0_scaler_a_scaler;
 }
 
-void TIMER0_OC0Mode(OC0Mode_type mode)
+void timer0_oc0_mode(en_oc0_mode_t en_oc0_mode_a_mode)
 {
-	switch (mode)
+	switch (en_oc0_mode_a_mode)
 	{
 		case OC0_DISCONNECTED:
 		CLR_BIT(TCCR0,COM00);
@@ -65,19 +65,19 @@ void TIMER0_OC0Mode(OC0Mode_type mode)
 	}
 }
 
-void TIMER0_OV_InterruptEnable(void)
+void timer0_ov_interrupt_enable(void)
 {
 	SET_BIT(TIMSK,TOIE0);
 }
-void TIMER0_OV_InterruptDisable(void)
+void timer_ov_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,TOIE0);
 }
-void TIMER0_OC_InterruptEnable(void)
+void timer0_oc_interrupt_enable(void)
 {
 	SET_BIT(TIMSK,OCIE0);
 }
-void TIMER0_OC_InterruptDisable(void)
+void timer0_oc_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,OCIE0);
 }
@@ -88,9 +88,9 @@ void TIMER0_OC_InterruptDisable(void)
 
 /**********************************************Timer 2 functions*******************************************/
 
-void TIMER2_Init(Timer2Mode_type mode)
+void timer2_init(en_timer2_mode_t en_timer2_mode_a_mode)
 {
-	switch (mode)
+	switch (en_timer2_mode_a_mode)
 	{
 		case TIMER2_NORMAL_MODE:
 		CLR_BIT(TCCR2,WGM20);
@@ -110,14 +110,14 @@ void TIMER2_Init(Timer2Mode_type mode)
 		break;
 	}
 }
-void Timer2_change(Timer2Scaler_type scaler)
+void timer2_change(en_timer2_scaler_t en_timer2_scaler_a_scaler)
 {
-	TCCR2&=0XF8;//0b11111000
-	TCCR2|=scaler;
+	TCCR2&=0XF8; /* 0b11111000 */
+	TCCR2|=en_timer2_scaler_a_scaler;
 }
-void TIMER2_OC0Mode(OC2Mode_type mode)
+void timer2_oc0_mode(en_oc2_mode_t en_oc2_mode_a_mode)
 {
-	switch (mode)
+	switch (en_oc2_mode_a_mode)
 	{
 		case OC2_DISCONNECTED:
 		CLR_BIT(TCCR2,COM20);
@@ -139,34 +139,34 @@ void TIMER2_OC0Mode(OC2Mode_type mode)
 }
 
 
-void TIMER2_OV_InterruptEnable(void)
+void timer2_ov_enterruptenable(void)
 {
 	SET_BIT(TIMSK,TOIE2);
 }
-void TIMER2_OV_InterruptDisable(void)
+void timer2_ov_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,TOIE2);
 }
-void TIMER2_OC_InterruptEnable(void)
+void timer2_oc_interruptenable(void)
 {
 	SET_BIT(TIMSK,OCIE2);
 }
-void TIMER2_OC_InterruptDisable(void)
+void timer2_oc_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,OCIE2);
 }
 
-void TIMER2_SET_OCReg(uint8_t_ oc_value)
+void timer2_set_oc2_reg(uint8_t_ uint8_a_value)
 {
-	OCR2=oc_value;
+	OCR2=uint8_a_value;
 }
 
 
 /*************************************************************************/
 /*timer 1 functions*/
-void Timer1_Init( Timer1Mode_type mode)
+void timer1_init( en_timer1_mode_t  en_timer1_mode_a_mode)
 {
-	switch (mode)
+	switch (en_timer1_mode_a_mode)
 	{
 		case TIMER1_NORMAL_MODE:
 		CLR_BIT(TCCR1A,WGM10);
@@ -215,14 +215,14 @@ void Timer1_Init( Timer1Mode_type mode)
 
 }
 
-void Timer1_change(Timer1Scaler_type scaler)
+void timer1_change(en_timer1_mode_t en_timer1_mode_a_mode)
 {
 	TCCR1B&=0XF8;
-	TCCR1B|=scaler;
+	TCCR1B|=en_timer1_mode_a_mode;
 }
-void Timer1_OCRA1Mode(OC1A_Mode_type oc1a_mode)
+void timer1_ocra1_mode(en_timer1_mode_t en_timer1_mode_a_mode)
 {
-	switch (oc1a_mode)
+	switch (en_timer1_mode_a_mode)
 	{
 		case OCRA_DISCONNECTED:
 		CLR_BIT(TCCR1A,COM1A0);
@@ -242,9 +242,9 @@ void Timer1_OCRA1Mode(OC1A_Mode_type oc1a_mode)
 		break;
 	}
 }
-void Timer1_OCRB1Mode(OC1B_Mode_type oc1b_mode)
+void timer1_ocrb1_mode(en_timer1_mode_t  en_timer1_mode_a_mode)
 {
-	switch (oc1b_mode)
+	switch (en_timer1_mode_a_mode)
 	{
 		case OCRB_DISCONNECTED:
 		CLR_BIT(TCCR1A,COM1B0);
@@ -264,12 +264,12 @@ void Timer1_OCRB1Mode(OC1B_Mode_type oc1b_mode)
 		break;
 	}
 }
-void Timer1_InputCaptureEdge(ICU_Edge_type edge)
+void timer1_input_capture_edge(en_icu_edge_t en_icu_edge_a_edge)
 {
-	if(edge==RISING)
+	if(en_icu_edge_a_edge==RISING)
 	SET_BIT(TCCR1B,ICES1);
 	
-	else if(edge==FALLING)
+	else if(en_icu_edge_a_edge==FALLING)
 	CLR_BIT(TCCR1B,ICES1);
 }
 
@@ -277,56 +277,56 @@ void Timer1_InputCaptureEdge(ICU_Edge_type edge)
 
 /****************************Timer 1 Interrupt functions**************************************/
 
-void Timer1_ICU_InterruptEnable(void)
+void timer1_icu_interrupt_enable(void)
 {
 	SET_BIT(TIMSK,TICIE1);
 }
-void Timer1_ICU_InterruptDisable(void)
+void timer1_icu_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,TICIE1);
 }
-void Timer1_OVF_InterruptEnable(void)
+void timer1_ovf_interrupt_enable(void)
 {
 	SET_BIT(TIMSK,TOIE1);
 }
-void Timer1_OVF_InterruptDisable(void)
+void timer1_ovf_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,TOIE1);
 }
-void Timer1_OCA_InterruptEnable(void)
+void timer1_oca_interrupt_enable(void)
 {
 	SET_BIT(TIMSK,OCIE1A);
 }
-void Timer1_OCA_InterruptDisable(void)
+void timer1_oca_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,OCIE1A);
 }
-void Timer1_OCB_InterruptEnable(void)
+void timer1_ocb_interrupt_enable(void)
 {
 	SET_BIT(TIMSK,OCIE1B);
 }
-void Timer1_OCB_InterruptDisable(void)
+void timer1_ocb_interrupt_disable(void)
 {
 	CLR_BIT(TIMSK,OCIE1B);
 }
 
 /*********************************Timer 1 Call Back functions*****************************************/
 
-void Timer1_OVF_SetCallBack(void(*LocalFptr)(void))
+void timer1_ovf_set_callback(void(*LocalFptr)(void))
 {
-	Timer1_OVF_Fptr=LocalFptr;
+	timer1_ovf_fptr=LocalFptr;
 }
-void Timer1_OCA_SetCallBack(void(*LocalFptr)(void))
+void timer1_oca_set_callback(void(*LocalFptr)(void))
 {
-	Timer1_OCA_Fptr=LocalFptr;
+	timer1_oca_fptr=LocalFptr;
 }
 void Timer1_OCB_SetCallBack(void(*LocalFptr)(void))
 {
-	Timer1_OCB_Fptr=LocalFptr;
+	timer1_ocb_fptr=LocalFptr;
 }
-void Timer1_ICU_SetCallBack(void(*LocalFptr)(void))
+void timer1_icu_set_callback(void(*LocalFptr)(void))
 {
-	Timer1_ICU_Fptr=LocalFptr;
+	timer1_icu_fptr=LocalFptr;
 }
 
 /*********************************Timer 2 ISR functions*********************************************/
@@ -334,30 +334,30 @@ void Timer1_ICU_SetCallBack(void(*LocalFptr)(void))
 /*********************************Timer 1 ISR functions*********************************************/
 ISR(TIMER1_OVF_vect)
 {
-	if(Timer1_OVF_Fptr!=NULL_PTR)
+	if(timer1_ovf_fptr!=NULL_PTR)
 	{
-		Timer1_OVF_Fptr();
+		timer1_ovf_fptr();
 	}
 }
 ISR(TIMER1_OCA_vect)
 {
-	if(Timer1_OCA_Fptr!=NULL_PTR)
+	if(timer1_oca_fptr!=NULL_PTR)
 	{
-		Timer1_OCA_Fptr();
+		timer1_oca_fptr();
 	}
 }
 ISR(TIMER1_OCB_vect)
 {
-	if(Timer1_OCB_Fptr!=NULL_PTR)
+	if(timer1_ocb_fptr!=NULL_PTR)
 	{
-		Timer1_OCB_Fptr();
+		timer1_ocb_fptr();
 	}
 }
 ISR(TIMER1_ICU_vect)
 {
-	if(Timer1_ICU_Fptr!=NULL_PTR)
+	if(timer1_icu_fptr!=NULL_PTR)
 	{
-		Timer1_ICU_Fptr();
+		timer1_icu_fptr();
 	}
 }
 

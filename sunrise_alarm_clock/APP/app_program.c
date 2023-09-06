@@ -309,8 +309,7 @@ void app_start(void)
                     LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_ALARM_SECONDS / 60) % 10));
 
                     /* Write Minutes Unit Digit */
-//                    LCD_setCursor(LCD_LINE2, LCD_COL9);
-                    LCD_sendChar(':');
+                    LCD_sendChar(APP_STR_ALARM_SLICER);
 
                     /* Write Seconds Tenth Digit */
                     LCD_sendChar(CONVERT_DIGIT_TO_CHAR((CURRENT_ALARM_SECONDS % 60) /10));
@@ -370,9 +369,6 @@ void app_start(void)
 
                     /* Stop Buzzer */
                     buzz_off();
-
-//                    /* stop ringing */
-//                    bool_gs_alarm_ringing = FALSE;
 
                     /* Turn off and reset alarm */
                     GET_ALARM_SECONDS(GET_CURRENT_RINGING_ALARM())       = ZERO  ;
@@ -583,11 +579,14 @@ static void app_switch_state(en_app_state_t state)
 
 static void app_timer_tick_event(void)
 {
+    /* declare loop index */
+    uint8_t_ uint8_alarm_index;
+
 	/* Timer ticked 1 second */
 	uint16_seconds_elapsed++;
 
     /* Update alarms times */
-    for (uint8_t_ uint8_alarm_index = 0; uint8_alarm_index < APP_SUPPORTED_ALARMS_COUNT; ++uint8_alarm_index)
+    for (uint8_alarm_index = 0; uint8_alarm_index < APP_SUPPORTED_ALARMS_COUNT; ++uint8_alarm_index)
     {
 
         /* Check if alarm is enabled and not ringing */

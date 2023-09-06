@@ -9,13 +9,6 @@
 #ifndef MEMMAP_H_
 #define MEMMAP_H_
 
-/*
-#  define __INTR_ATTRS used, externally_visible
-#  define ISR(vector, ...)            \
-void vector (void) __attribute__ ((signal,__INTR_ATTRS)) __VA_ARGS__; \
-void vector (void)*/
-//#define _VECTOR(N) __vector_ ## N*/
-
 /* DIO_Registers */
 #define DDRA (*(volatile unsigned char*)0x3A)
 #define DDRB (*(volatile unsigned char*)0x37)
@@ -390,12 +383,6 @@ void vector (void)*/
 #  define BAD_vect        __vector_default
 
 /*interrupt functions*/
-
-# define sei()  __asm__ __volatile__ ("sei" ::)
-# define cli()  __asm__ __volatile__ ("cli" ::)
-# define reti()  __asm__ __volatile__ ("reti" ::)
-# define ret()  __asm__ __volatile__ ("ret" ::)
-
 #  define ISR_NOBLOCK    __attribute__((interrupt))
 #  define ISR_NAKED      __attribute__((naked))
 

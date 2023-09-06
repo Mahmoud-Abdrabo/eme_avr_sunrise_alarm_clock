@@ -1,6 +1,7 @@
-//
-// Created by Hossam Elwahsh on 8/31/2023.
-//
+/*
+ * Created by Hossam Elwahsh on 8/31/2023.
+*/
+
 
 #include "pwm_linking_config.h"
 #include "Led_Cfg.h"

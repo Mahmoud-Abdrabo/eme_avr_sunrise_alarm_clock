@@ -7,12 +7,12 @@
 
 #include "kpd_config.h"
 #include "kpd_interface.h"
-#include "Timers.h"
+#include "timer_interface.h"
 #include "Timers_Services.h"
 
 #define  F_CPU    16000000UL
 
-#define KPD_INIT_DELAY_TIMER()  TIMER2_Init(TIMER2_NORMAL_MODE)
+#define KPD_INIT_DELAY_TIMER()  timer2_init(TIMER2_NORMAL_MODE)
 #define KPD_TIMER_MS_DELAY(ms_delay_val) delay_ms(ms_delay_val)
 
 const uint8_t_ keypad_values[4][4] = {
@@ -39,22 +39,25 @@ const uint8_t_ keypad_rows[KEYPAD_ROWS_TOTAL] = {
 
 void keypad_init(void)
 {
+    /* Declare local variables */
+    uint8_t_ uint8_l_loop_counter;
+
     /* Init keypad */
     KPD_INIT_DELAY_TIMER();
 
     /* init rows */
-    for (int i = 0; i < KEYPAD_ROWS_TOTAL; ++i) {
+    for (uint8_l_loop_counter = 0; uint8_l_loop_counter < KEYPAD_ROWS_TOTAL; ++uint8_l_loop_counter) {
         /* init pin as input */
-        GPIO_setupPinDirection( KEYPAD_ROW_PORT , keypad_rows[i] , PIN_INPUT);
+        GPIO_setupPinDirection(KEYPAD_ROW_PORT , keypad_rows[uint8_l_loop_counter] , PIN_INPUT);
         /* enable pin pull up */
-        GPIO_writePin( KEYPAD_ROW_PORT , keypad_rows[i] , LOGIC_HIGH);
+        GPIO_writePin(KEYPAD_ROW_PORT , keypad_rows[uint8_l_loop_counter] , LOGIC_HIGH);
     }
 
     /* init columns */
-    for (int i = 0; i < KEYPAD_ROWS_TOTAL; ++i)
+    for (uint8_l_loop_counter = 0; uint8_l_loop_counter < KEYPAD_ROWS_TOTAL; ++uint8_l_loop_counter)
     {
         /* init pin as input */
-        GPIO_setupPinDirection( KEYPAD_COLUMN_PORT , keypad_rows[i] , PIN_INPUT);
+        GPIO_setupPinDirection(KEYPAD_COLUMN_PORT , keypad_rows[uint8_l_loop_counter] , PIN_INPUT);
     }
 
 }
@@ -62,39 +65,44 @@ void keypad_init(void)
 
 uint8_t_ keypad_read(void)
 {
-    uint8_t_ uint8_val_retval = NULL;
+    /* Declare local variables */
+    uint8_t_ uint8_l_rows_loop_index;
+    uint8_t_ uint8_l_cols_loop_index;
+    uint8_t_ uint8_val_retval;
 
-    for (int row = 0; row < KEYPAD_ROWS_TOTAL; ++row)
+    uint8_val_retval = NULL;
+
+    for (uint8_l_rows_loop_index = 0; uint8_l_rows_loop_index < KEYPAD_ROWS_TOTAL; ++uint8_l_rows_loop_index)
     {
 
         /* set row as output -> low */
-        GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[row], PIN_OUTPUT);
-        GPIO_writePin(KEYPAD_ROW_PORT, keypad_rows[row], LOGIC_LOW);
+        GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[uint8_l_rows_loop_index], PIN_OUTPUT);
+        GPIO_writePin(KEYPAD_ROW_PORT, keypad_rows[uint8_l_rows_loop_index], LOGIC_LOW);
 
-        for (int col = 0; col < KEYPAD_COLS_TOTAL; ++col)
+        for (uint8_l_cols_loop_index = 0; uint8_l_cols_loop_index < KEYPAD_COLS_TOTAL; ++uint8_l_cols_loop_index)
         {
             uint8_t_ u8_l_dio_pin_val = LOGIC_HIGH;
 
-            u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[col]);
+            u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[uint8_l_cols_loop_index]);
 
             if (u8_l_dio_pin_val == LOGIC_LOW)
             {
                 /* debounce */
                 KPD_TIMER_MS_DELAY(KEYPAD_DEBOUNCE_DELAY_MS);
 
-                u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[col]);
+                u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[uint8_l_cols_loop_index]);
 
                 /* block till user release key */
                 while (u8_l_dio_pin_val == LOGIC_LOW)
                 {
-                    u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[col]);
+                    u8_l_dio_pin_val = GPIO_readPin(KEYPAD_COLUMN_PORT, keypad_cols[uint8_l_cols_loop_index]);
                 }
 
                 /* revert row to input */
-                GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[row], PIN_INPUT);
+                GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[uint8_l_rows_loop_index], PIN_INPUT);
 
 
-                return keypad_values[row][col];
+                return keypad_values[uint8_l_rows_loop_index][uint8_l_cols_loop_index];
 
                 /*if (u8_l_dio_pin_val == LOGIC_LOW)
                 {
@@ -104,7 +112,7 @@ uint8_t_ keypad_read(void)
         }
 
         /* revert row to input */
-        GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[row], PIN_INPUT);
+        GPIO_setupPinDirection(KEYPAD_ROW_PORT, keypad_rows[uint8_l_rows_loop_index], PIN_INPUT);
     }
 
     return uint8_val_retval;
