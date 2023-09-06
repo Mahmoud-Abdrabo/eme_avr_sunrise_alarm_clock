@@ -46,8 +46,8 @@ When an alarm time is reached, the Sunrise Alarm provides a gentle and effective
   _Snooze durations for the 2 modes can be configured by updating `app_config.h` file_
 - If a subsequent alarm is set to activate shortly after the first one, the system will automatically run the next alarm after dismissing the current one.
 
-### Video showcase 👉 [video](Docs/WhatsApp%20Video%202023-09-03%20at%2009.24.20.mp4)
-
+### Video showcase on [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=flat&logo=YouTube&logoColor=white)](https://youtu.be/FdnBLit7vIg)
+if link doesn't work copy and paste the following `https://youtu.be/FdnBLit7vIg`
 ### Layered Architecture
 
 ![Layered_Arch](Docs/Layered_architecture.drawio.png)
