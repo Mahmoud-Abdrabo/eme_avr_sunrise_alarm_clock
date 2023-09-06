@@ -4,10 +4,10 @@
 
 ### Team Members
 
-- Mahmoud Abdrabo - [Github](https://github.com/Mahmoud-Abdrabo)
-- Hossam Elwahsh - [Github](https://github.com/HossamElwahsh)
-- Ahmed Sakr - [Github](https://github.com/Ahmeddsakrrr)
-- MennaTullah Ahmed - [Github](https://github.com/Menna-Ahmed)
+- Mahmoud Abdrabo - [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/Mahmoud-Abdrabo)
+- Hossam Elwahsh - [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/HossamElwahsh) [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hossam-elwahsh/)
+- Ahmed Sakr - [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/Ahmeddsakrrr)
+- MennaTullah Ahmed - [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/Menna-Ahmed)
 
 ### AVR Interfacing Project
 
@@ -28,7 +28,7 @@
 
 #### 2. Cancel Alarm
 
-- Select this option to cancel a previously set alarm. Choose the alarm slot you wish to cancel, and the system will reset it to zero, ready for reconfiguration.
+- Select this option to cancel a previously set alarm. Choose the alarm slot you wish to cancel, and the system will cancel it for you, ready for reconfiguration.
 
 #### 3. Show Alarm
 
@@ -38,10 +38,13 @@
 
 When an alarm time is reached, the Sunrise Alarm provides a gentle and effective wakeup experience:
 
-- Four LEDs will be dlimming for some seconds, simulating a natural sunrise.
-- After the LED simulation, a buzzer activates to ensure the user is awake.
-- The buzzer can be silenced by covering the light sensor (LDR), encouraging the user to get out of bed and start their day.
-- If a subsequent alarm is set to activate shortly after the first one, the system automatically switches from one alarm to the next, ensuring a seamless wake-up experience.
+- Four LEDs will be dimming for some seconds, simulating a natural sunrise.
+- After a while, a buzzer will be activated to ensure the user wakes up.
+- The alarm can be dismissed by covering the light sensor (LDR), encouraging the user to get out of bed and start their day.
+- Alternatively, alarm can be snoozed by pressing key `C` or `D` on the keypad.
+   
+  _Snooze durations for the 2 modes can be configured by updating `app_config.h` file_
+- If a subsequent alarm is set to activate shortly after the first one, the system will automatically run the next alarm after dismissing the current one.
 
 ### Video showcase 👉 [video](Docs/WhatsApp%20Video%202023-09-03%20at%2009.24.20.mp4)
 
