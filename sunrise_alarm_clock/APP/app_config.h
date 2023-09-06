@@ -19,6 +19,9 @@
 #define APP_LED_MAXIMUM_DUTY            (95)
 #define APP_RING_CYCLES_DURATION_MS     (50)
 #define APP_RING_CYCLES_TILL_BUZZ_ON    (200)
+#define APP_SNOOZE_1_DURATION_IN_MIN    (1)
+#define APP_SNOOZE_2_DURATION_IN_MIN    (2)
+
 
 /* App Strings */
 #define APP_STR_TITLE               ((uint8_t_ *)"    Team GUCALEX")
@@ -29,10 +32,11 @@
 #define APP_STR_CHOOSE_ALARM        ((uint8_t_ *)"Choose Alarm: (0-9)")
 #define APP_STR_ALARM               ((uint8_t_ *)"Alarm ")
 #define APP_STR_ALARM_RINGING       ((uint8_t_ *)"WakeUp!")
+#define APP_STR_ALARM_SNOOZE        ((uint8_t_ *)"Snooze (C) or (D)")
 #define APP_STR_ALARM_SET           ((uint8_t_ *)"Alarm Set")
 #define APP_STR_ALARM_DISABLED      ((uint8_t_ *)"Alarm is  disabled")
 #define APP_STR_ALARM_PLACEHOLDER   ((uint8_t_ *)"_*:**")
-#define APP_STR_ALARM_SLICER        ':'
+#define APP_STR_ALARM_SLICER        (':')
 
 /* App Delays */
 #define APP_DELAY_MS_MSG_TIMEOUT (1000)
@@ -41,5 +45,7 @@
 #define KPD_CANCEL_ALARM    ('2')
 #define KPD_SHOW_ALARM      ('3')
 #define KPD_EXIT            ('A')
+#define KPD_SNOOZE_1_MIN    ('C')
+#define KPD_SNOOZE_2_MIN    ('D')
 
 #endif /* APP_CONFIG_H_ */

@@ -24,6 +24,7 @@ typedef enum
 
 static void app_switch_state        (en_app_state_t state)  ;
 static void app_timer_tick_event    (void)                  ;
+static void stop_or_snooze_alarm    (boolean bool_a_snooze, uint8_t_ uint8_a_snooze_by_min);
 
 static uint8_t_                 uint8_gs_current_alarm_index    =   ZERO            ;
 static uint8_t_                 uint8_gs_current_ringing_alarm  =   ZERO            ;
@@ -358,28 +359,16 @@ void app_start(void)
 
                 if(TRUE == bool_gs_stop_alarm_pressed)
                 {
-                    /* Stop PWM */
-                    pwm_stop();
-
-                    /* Turn off LEDs */
-                    Led_TurnOff(LED_RED_PORT, LED_RED_PIN);
-                    Led_TurnOff(LED_BLUE_PORT, LED_BLUE_PIN);
-                    Led_TurnOff(LED_GREEN_PORT, LED_GREEN_PIN);
-                    Led_TurnOff(LED_YELLOW_PORT, LED_YELLOW_PIN);
-
-                    /* Stop Buzzer */
-                    buzz_off();
-
-                    /* Turn off and reset alarm */
-                    GET_ALARM_SECONDS(GET_CURRENT_RINGING_ALARM())       = ZERO  ;
-                    GET_ALARM_IS_ENABLED(GET_CURRENT_RINGING_ALARM())    = FALSE ;
-                    GET_ALARM_IS_RINGING(GET_CURRENT_RINGING_ALARM())    = FALSE ;
-
-                    /* Decrement enabled alarms count */
-                    DECREMENT(GET_ENABLED_ALARMS_COUNT());
-
-                    /* Switch to show options UI/state */
-                    app_switch_state(APP_STATE_SHOW_OPTIONS);
+                    stop_or_snooze_alarm(FALSE, NULL);
+                }
+                /* check if snooze is pressed */
+                else if(KPD_SNOOZE_1_MIN == uint8_kpd_value)
+                {
+                    stop_or_snooze_alarm(TRUE, APP_SNOOZE_1_DURATION_IN_MIN);
+                }
+                else if(KPD_SNOOZE_2_MIN == uint8_kpd_value)
+                {
+                    stop_or_snooze_alarm(TRUE, APP_SNOOZE_2_DURATION_IN_MIN);
                 }
                 else
                 {
@@ -413,7 +402,7 @@ void app_start(void)
                     if(uint16_led_dimmer_counter > APP_RING_CYCLES_TILL_BUZZ_ON)
                     {
                         /* start buzzer */
-                        buzz_on();
+                        buzz_toggle();
                     }
 
                     /* Delay PWM */
@@ -555,8 +544,13 @@ static void app_switch_state(en_app_state_t state)
             LCD_sendString(APP_STR_ALARM);
             LCD_sendChar(CONVERT_DIGIT_TO_CHAR(GET_CURRENT_RINGING_ALARM()));
 
+            /* Print wakeup message */
             LCD_setCursor(LCD_LINE2, LCD_COL6);
             LCD_sendString(APP_STR_ALARM_RINGING);
+
+            /* Print snooze message */
+            LCD_setCursor(LCD_LINE3, LCD_COL0);
+            LCD_sendString(APP_STR_ALARM_SNOOZE);
 
             en_gs_app_state = APP_STATE_ALARM_RINGING;
             break;
@@ -575,6 +569,47 @@ static void app_switch_state(en_app_state_t state)
             break;
         }
     }
+}
+
+/**
+ * Stops current ringing alarm/snoozes it by x minutes
+ * @param bool_a_snooze TRUE: snooze, FALSE: stop
+ * @param uint8_a_snooze_by_min duration of snooze in minutes
+ */
+static void stop_or_snooze_alarm    (boolean bool_a_snooze, uint8_t_ uint8_a_snooze_by_min)
+{
+    /* Stop PWM */
+    pwm_stop();
+
+    /* Turn off LEDs */
+    Led_TurnOff(LED_RED_PORT, LED_RED_PIN);
+    Led_TurnOff(LED_BLUE_PORT, LED_BLUE_PIN);
+    Led_TurnOff(LED_GREEN_PORT, LED_GREEN_PIN);
+    Led_TurnOff(LED_YELLOW_PORT, LED_YELLOW_PIN);
+
+    /* Stop Buzzer */
+    buzz_off();
+
+    /* Turn off and reset alarm */
+    GET_ALARM_IS_RINGING(GET_CURRENT_RINGING_ALARM())    = FALSE ;
+
+    if(TRUE == bool_a_snooze)
+    {
+        /* Snooze Alarm */
+        GET_ALARM_SECONDS(GET_CURRENT_RINGING_ALARM())       = uint8_a_snooze_by_min * 60  ;
+    }
+    else
+    {
+        /* Disable Alarm */
+        GET_ALARM_SECONDS(GET_CURRENT_RINGING_ALARM())       = ZERO  ;
+        GET_ALARM_IS_ENABLED(GET_CURRENT_RINGING_ALARM())    = FALSE ;
+
+        /* Decrement enabled alarms count */
+        DECREMENT(GET_ENABLED_ALARMS_COUNT());
+    }
+
+    /* Switch to show options UI/state */
+    app_switch_state(APP_STATE_SHOW_OPTIONS);
 }
 
 static void app_timer_tick_event(void)
